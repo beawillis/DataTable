@@ -110,6 +110,12 @@ the relevant owner and Elisha first.
   data-model types integrate with `DataTable`, including ownership and
   lifetime, supported value types, and invalid-access behavior. Table-level
   row/column integration remains pending that shared contract.
+### Primah — Data Model
+
+- **Completed work:** `[PRIMAH: add summary]`
+- **Files changed:** `[PRIMAH: add links]`
+- **Tests and validation:** `[PRIMAH: add results]`
+- **Open decisions or blockers:** `[PRIMAH: add details]`
 
 
 
