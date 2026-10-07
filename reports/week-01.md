@@ -84,6 +84,32 @@ the relevant owner and Elisha first.
 
 
 
+### Primah Mukhaye — Data Model
+
+- **Completed work:** Implemented the foundational `Cell`, `Row`, and `Column`
+  data-model types. `Cell` stores null, boolean, signed and unsigned integer,
+  floating-point, or string values, with typed inspection/access and text
+  formatting. `Row` owns an ordered sequence of cells; `Column` owns an
+  ordered sequence of cells and validates its required name. Both provide
+  size/empty queries, checked indexed access, append, and clear operations.
+- **Files changed:** [`cell.hpp`](../include/datatable/cell.hpp),
+  [`cell.cpp`](../src/cell.cpp), [`row.hpp`](../include/datatable/row.hpp),
+  [`row.cpp`](../src/row.cpp), [`column.hpp`](../include/datatable/column.hpp),
+  [`column.cpp`](../src/column.cpp), and focused tests in
+  [`test_cell.cpp`](../tests/test_cell.cpp),
+  [`test_row.cpp`](../tests/test_row.cpp), and
+  [`test_column.cpp`](../tests/test_column.cpp).
+- **Tests and validation:** Added focused coverage for supported cell types,
+  null and string handling, formatting and invalid typed access; row and
+  column construction, mutation, clearing, and bounds errors; and empty column
+  names. The tests are registered as `DataTable.cell`, `DataTable.row`, and
+  `DataTable.column` in [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+  CMake Tools could not configure the project during this report update, so
+  these tests were not executed.
+- **Open decisions or blockers:** Agree with Elisha on how these standalone
+  data-model types integrate with `DataTable`, including ownership and
+  lifetime, supported value types, and invalid-access behavior. Table-level
+  row/column integration remains pending that shared contract.
 ### Primah — Data Model
 
 - **Completed work:** `[PRIMAH: add summary]`
