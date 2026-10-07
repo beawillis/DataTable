@@ -119,13 +119,41 @@ the relevant owner and Elisha first.
 
 
 
-### Daniel — CSV / Data I/O
+### Manige Daniel's work completed
 
-- **Completed work:** `[DANIEL: add summary]`
-- **Files changed:** `[DANIEL: add links]`
-- **Tests and validation:** `[DANIEL: add results]`
-- **Open decisions or blockers:** `[DANIEL: add details]`
+#### 2.1 CSV parsing foundation
 
+- Investigated and implemented the CSV input layer for the DataTable project.
+- Added the public CSV interface in [`include/datatable/csv.hpp`](../include/datatable/csv.hpp).
+- Implemented the parsing logic in [`src/csv.cpp`](../src/csv.cpp).
+- Supported the required CSV behaviors for:
+  - plain records and empty fields
+  - quoted values containing commas
+  - embedded newline characters inside quoted fields
+  - escaped quotes using double quotes
+  - trailing delimiters and empty final fields
+  - rejection of malformed quoting with `std::invalid_argument`
+
+#### 2.2 Data ingestion tests
+
+Added the CSV parser regression coverage in [`tests/test_csv.cpp`](../tests/test_csv.cpp), including:
+
+- parsing standard comma-delimited output
+- preserving empty values and blank records
+- handling quoted fields and embedded line breaks
+- validating stream input and empty-input behavior
+- rejecting malformed CSV input consistently
+
+#### 2.3 Validation and integration notes
+
+- Verified the CSV parser through direct compile-and-run checks.
+- Confirmed the parser integrates cleanly with the current project layout and test infrastructure.
+- The parser currently handles raw CSV extraction only; the next step is to define how the parsed data becomes typed `Cell`, `Column`, and `Row` objects in the shared data model.
+
+**Open decisions or blockers:**
+
+- Agree on the conversion rules from CSV records into typed table data.
+- Confirm the row-width and type-conversion rules before integrating CSV output with the main `DataTable` interface.
 
 
 ### Nantale — Sorting and Filtering
@@ -186,11 +214,18 @@ the relevant owner and Elisha first.
 ## 8. Validation status
 
 - Initial table-core tests were added and are registered with CTest.
-- Full-project validation should be recorded here after the team completes the
-  Week 1 implementation pass:
+- CSV parser validation has been completed for the current implementation pass.
 
 ```text
-[TEAM: record cmake configure result]
-[TEAM: record cmake build result]
-[TEAM: record ctest result]
+CMake configure result: successful
+CMake build result: successful
+CTest result: 2/2 tests passed
 ```
+
+## 9. AI use
+
+### Manige Daniel
+- Tool: ChatGPT
+- Purpose: Reviewing CSV parsing edge cases, validating malformed-input handling, and confirming a robust API design for string-based input.
+- Reason: To reduce the risk of incorrect behavior around empty fields, quoting, and embedded newlines before implementing and testing the parser.
+- Verification: The recommendations were checked against the actual parser behavior and confirmed by the passing CSV test suite.
