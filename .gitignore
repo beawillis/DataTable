@@ -1,0 +1,71 @@
+# CMake build directories
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Compiled binaries and libraries
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+
+# Code::Blocks
+*.cbp
+*.layout
+*.depend
+
+# CLion / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+
+# Test / coverage output
+Testing/
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.swp
+*.swo
+*~
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local installation directory
+install/
+
+# Generated documentation
+docs/_build/
+
+# IDE / editor backup files
+*.bak
+*.orig
