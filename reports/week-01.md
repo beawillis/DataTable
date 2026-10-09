@@ -10,6 +10,8 @@ Establish the initial project foundation and define a small, stable `DataTable`
 core that the data-model, CSV, algorithm, grouping, formatting, and export
 modules can build on.
 
+
+
 ## 2. Elisha Alvin Bifandhuba's work completed
 
 ### 2.1 Project foundation
@@ -52,6 +54,33 @@ Added the initial table tests in
 - Rejection of empty column names.
 - Clearing the table and restoring the empty state.
 
+### 2.4 Class structure and implementation
+
+The table core is organized around the `DataTable` class.
+
+- **Class created:** `DataTable`, the central public object used by the rest of
+  the library.
+- **Data held:** private `column_names_` stores the table schema and private
+  `row_count_` stores the current number of rows.
+- **Member functions:** the public constructor creates an empty table;
+  `rowCount()`, `columnCount()`, and `empty()` inspect its state; `clear()`
+  removes the schema and resets the row count; `columnNames()` provides
+  read-only schema access; and `addColumn()` adds a validated column name.
+- **Public and private members:** the query and update functions are public
+  because CSV, data-model, algorithm, formatting, and export modules need to
+  use them. The data members are private so callers cannot directly create an
+  inconsistent schema or row count. `addColumn()` performs validation and
+  reports an empty name with `std::invalid_argument`.
+- **How it is used:** `DataTable` is the shared table boundary. Other modules
+  are expected to use this class instead of introducing separate table
+  representations. Typed `Cell`, `Row`, and `Column` ownership will be
+  integrated after the shared interface is agreed.
+
+These design choices answer the implementation questions directly: the class
+exists to provide one central table abstraction; it holds schema and size
+state; its member functions operate on that state; and private storage
+protects invariants while public functions provide controlled access.
+
 ## 3. Week 1 design decisions
 
 - `DataTable` is the central public table representation; other modules must
@@ -84,6 +113,7 @@ the relevant owner and Elisha first.
 
 
 
+
 ### Primah Mukhaye — Data Model
 
 - **Completed work:** Implemented the foundational `Cell`, `Row`, and `Column`
@@ -92,6 +122,7 @@ the relevant owner and Elisha first.
   formatting. `Row` owns an ordered sequence of cells; `Column` owns an
   ordered sequence of cells and validates its required name. Both provide
   size/empty queries, checked indexed access, append, and clear operations.
+
 - **Files changed:** [`cell.hpp`](../include/datatable/cell.hpp),
   [`cell.cpp`](../src/cell.cpp), [`row.hpp`](../include/datatable/row.hpp),
   [`row.cpp`](../src/row.cpp), [`column.hpp`](../include/datatable/column.hpp),
@@ -99,6 +130,7 @@ the relevant owner and Elisha first.
   [`test_cell.cpp`](../tests/test_cell.cpp),
   [`test_row.cpp`](../tests/test_row.cpp), and
   [`test_column.cpp`](../tests/test_column.cpp).
+
 - **Tests and validation:** Added focused coverage for supported cell types,
   null and string handling, formatting and invalid typed access; row and
   column construction, mutation, clearing, and bounds errors; and empty column
@@ -110,12 +142,35 @@ the relevant owner and Elisha first.
   data-model types integrate with `DataTable`, including ownership and
   lifetime, supported value types, and invalid-access behavior. Table-level
   row/column integration remains pending that shared contract.
-### Primah — Data Model
 
-- **Completed work:** `[PRIMAH: add summary]`
-- **Files changed:** `[PRIMAH: add links]`
-- **Tests and validation:** `[PRIMAH: add results]`
-- **Open decisions or blockers:** `[PRIMAH: add details]`
+#### Class structure and implementation
+
+Primah's work is organized around three data-model classes:
+
+- **`Cell`:** stores one value in private `value_`, a `CellValue` variant.
+  The variant supports null, `bool`, signed and unsigned integers, `double`,
+  and `std::string`. Public constructors create supported values; `isNull()`,
+  `value()`, `holds<T>()`, `get<T>()`, `getIf<T>()`, and `toString()` inspect,
+  retrieve, or format the value. The value member is private so callers use
+  checked access rather than changing the variant representation directly.
+- **`Row`:** stores an ordered sequence of cells in private `cells_`.
+  Public constructors create empty or initialized rows, while `size()`,
+  `empty()`, `cells()`, `at()`, `operator[]`, `append()`, and `clear()` inspect
+  or modify the sequence. Keeping the vector private preserves ownership and
+  gives the class control over indexed access and bounds errors.
+- **`Column`:** stores a column label in private `name_` and its ordered cell
+  values in private `cells_`. Public constructors, `name()`, `size()`,
+  `empty()`, `cells()`, `at()`, `operator[]`, `append()`, and `clear()` provide
+  the usable column interface. The private `validateName()` function rejects
+  empty names before the column becomes part of the data model.
+
+These classes answer the design questions as follows: `Cell` was created to
+represent one typed value, `Row` to represent one ordered record, and `Column`
+to represent one named field. Their functions operate on their owned data.
+Public functions expose safe operations needed by the table and algorithm
+modules, while private members protect ownership, representation, and
+validation rules.
+
 
 
 
@@ -155,40 +210,203 @@ Added the CSV parser regression coverage in [`tests/test_csv.cpp`](../tests/test
 - Agree on the conversion rules from CSV records into typed table data.
 - Confirm the row-width and type-conversion rules before integrating CSV output with the main `DataTable` interface.
 
+#### Class structure and implementation
+
+The CSV module is intentionally a small functional interface rather than a
+second table class.
+
+- **Types used:** `CsvRecord` is a public alias for
+  `std::vector<std::string>`, and `CsvData` is a public alias for
+  `std::vector<CsvRecord>`. These types represent parsed records and fields
+  before typed table integration.
+- **Member functions:** `parseCsv(std::istream&)` reads a stream and returns
+  `CsvData`; `parseCsv(const std::string&)` creates a stream from a string and
+  delegates to the stream overload.
+- **Data members and visibility:** there is no persistent CSV object or
+  module-specific class data member. During parsing, the implementation keeps
+  local state such as the current record, field, quote state, and
+  `record_started` flag. Those locals are private to the parsing function,
+  which prevents one parse operation from leaking state into another.
+- **How it is used:** callers pass CSV text or a stream and receive raw string
+  records. The parser does not infer types or create a `DataTable`; later
+  integration will convert records into `Cell`, `Row`, and `Column` objects
+  under the agreed shared contract.
+
+The answers are therefore: no new CSV class was needed because parsing is a
+stateless operation; the returned aliases hold records and fields; the two
+public overloads perform parsing; and local private state keeps quote handling
+isolated while the public functions provide the API used by the rest of the
+program.
+
+
+
 
 ### Nantale — Sorting and Filtering
 
-- **Completed work:** `[NANTALE: add summary]`
-- **Files changed:** `[NANTALE: add links]`
-- **Tests and validation:** `[NANTALE: add results]`
-- **Open decisions or blockers:** `[NANTALE: add details]`
+- **Completed work:** Implemented non-mutating column sorting and filtering
+  using the shared `Column` and `Cell` classes. Sorting supports ascending and
+  descending order, and filtering supports predicates and exact value matches.
+  Numeric cells are compared numerically, strings lexicographically, nulls
+  before non-null values, and mixed types deterministically by variant order.
+- **Files changed:** [`sort.hpp`](../include/datatable/sort.hpp),
+  [`sort.cpp`](../src/sort.cpp), [`filter.hpp`](../include/datatable/filter.hpp),
+  [`filter.cpp`](../src/filter.cpp), [`test_sort.cpp`](../tests/test_sort.cpp),
+  [`test_filter.cpp`](../tests/test_filter.cpp), and
+  [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Tests and validation:** Added tests for ascending and descending sorting,
+  source-column preservation, exact filtering, predicate filtering, and
+  filtered result contents. The project configured and built successfully.
+  Sort tests passed. Some CTest executables were blocked from starting by the
+  Windows Application Control policy in the environment; this is unrelated to
+  compilation.
+- **Open decisions or blockers:** Table-level row sorting and filtering remain
+  dependent on the future `DataTable` row/column integration. The current Week
+  1 API intentionally returns new columns and does not mutate the source.
+
+#### Class structure and implementation notes
+
+The sort/filter work is organized around the actual classes already used in the
+project:
+
+- `DataTable` is the main table object. It owns the schema and the tabular
+  structure used by the rest of the program. Its `column_names_` member holds the
+  table headings, and `row_count_` keeps the current table size. Public members
+  such as `addColumn()` and `columnNames()` allow the program to inspect or extend
+  the table structure, while the internal state stays private to preserve a valid
+  table schema.
+- `Column` represents one data column. It stores a `name_` and a `cells_`
+  vector, meaning a column is both identified by its label and owns the values
+  belonging to that field. The public API exposes `name()`, `size()`, `empty()`,
+  `at()`, `append()`, and `clear()`, which allows the rest of the program to
+  read or mutate a single column without needing to know how the values are
+  stored internally. The private `validateName()` helper prevents invalid empty
+  names.
+- `Row` represents a single record. It owns a `cells_` vector, which means each
+  row is responsible for its own sequence of field values. Public accessors such
+  as `size()`, `cells()`, `at()`, `append()`, and `clear()` keep row handling
+  simple and consistent. The private storage keeps the row's data safe from direct
+  misuse.
+- `Cell` is the actual value container. It holds a `CellValue` variant named
+  `value_`, which can represent null, boolean, integer, unsigned integer,
+  floating-point, or string data. Public methods like `isNull()`, `holds<T>()`,
+  `get<T>()`, and `toString()` let the program inspect and compare values without
+  exposing the internal variant storage.
+
+These classes answer the key questions of the design:
+
+1. What class did we create or design?
+   The sort/filter module is organized around the existing `DataTable`, `Column`,
+   `Row`, and `Cell` classes. We did not create a separate table model because
+   the project already establishes one central DataTable structure.
+
+2. Why?
+   Sorting and filtering are operations on table data, not independent data
+   stores. Reusing the project’s central classes keeps the program consistent,
+   lets the logic work with real rows and columns, and avoids duplicating the
+   same structure in multiple modules.
+
+3. What data does it hold?
+   `DataTable` holds column names and the current table size, `Column` holds a
+   name and a list of cells, `Row` holds a list of cells for one record, and
+   `Cell` holds one typed value.
+
+4. What functions operate on that data?
+   `DataTable` exposes schema and size queries, `Column` exposes access and
+   mutation of a column, `Row` exposes access and mutation of a row, and `Cell`
+   exposes null checks, typed reads, and string conversion. Sort and filter logic
+   will use these APIs to locate a target column, compare cell values, and build a
+   reordered or filtered result.
+
+5. Why are some members private and others public?
+   The public interface exposes the operations other modules need, while the data
+   members remain private so the class can enforce valid state. For example,
+   `Column` keeps `name_` and `cells_` private so it can validate names and control
+   how cells are appended or accessed. This prevents invalid table states and keeps
+   the rest of the project using the API instead of directly manipulating internal
+   storage.
+
+The Week 1 implementation uses a `Column` directly: `sortColumn()` copies its
+cells, orders them, and returns a new named column; `filterColumn()` copies only
+accepted cells; and `filterEquals()` supplies a common exact-match operation.
+The source column remains unchanged, keeping the implementation modular and
+safe until `DataTable` exposes integrated rows and columns.
 
 
 
-### Brian — Grouping and Aggregation
+### Brian — Grouping
 
-- **Completed work:** `[BRIAN: add summary]`
-- **Files changed:** `[BRIAN: add links]`
-- **Tests and validation:** `[BRIAN: add results]`
-- **Open decisions or blockers:** `[BRIAN: add details]`
+- **Completed work:** Implemented grouping for a `Column`. `groupBy()` scans
+  the source values, creates one `Group` for each distinct key, counts
+  repeated values, and preserves the order in which keys first appear. The
+  grouping operation does not modify the source column.
+
+- **Files changed:** [`group.hpp`](../include/datatable/group.hpp),
+  [`group.cpp`](../src/group.cpp), [`test_group.cpp`](../tests/test_group.cpp),
+  and [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+
+- **Tests and validation:** Added coverage for distinct keys, repeated-key
+  counts, first-seen group order, and preservation of the input column.
+
+- **Open decisions or blockers:** The current Week 1 API groups a standalone
+  `Column` because `DataTable` does not yet expose integrated rows and columns.
+  Table-level grouping and grouped-row results should be agreed when that
+  shared interface is extended. Aggregation is not part of Brian's work and is
+  reserved for Hamza.
+
+#### Class structure and implementation
+
+Brian's grouping code introduces one small class, `Group`.
+
+- **Class created:** `Group` represents one distinct grouping key and its
+  occurrence count.
+- **Private data members:** `key_` stores the grouping `Cell`, and `count_`
+  stores how many source values belong to the group. `addValue()` is private
+  because only the grouping algorithm should increase a group's count.
+- **Public member functions:** `key()` returns the group's key and `count()`
+  returns its frequency. Both are read-only accessors.
+- **Supporting type and function:** `GroupedColumn` is a public vector of
+  `Group` objects. The public `groupBy(const Column&)` function creates the
+  groups from a column.
+- **Why the members are public or private:** Callers need public access to read
+  group keys and counts, but the stored data and count update must remain
+  controlled. Keeping `key_`, `count_`, and `addValue()` private prevents
+  outside code from changing a result after it has been produced.
+- **How the classes are used:** `groupBy()` reads the public `Column::cells()`
+  interface, compares each `Cell::value()`, and either creates a new `Group`
+  or increments an existing one. The result is returned as a new vector, so
+  grouping is non-mutating and can be consumed by later reporting code.
+
+The design answers the implementation questions directly: `Group` was created
+to package a distinct key with its count; it holds one `Cell` and one count;
+`key()` and `count()` operate on that data; and private storage protects the
+group result while public accessors make it usable by the rest of the program.
+
+
+
+### Hamza - Aggregation
+
+- **Completed work:** `[HAMZA: add summary when implemented]`
+- **Files changed:** `[HAMZA: add links when implemented]`
+- **Tests and validation:** `[HAMZA: add results when implemented]`
+- **Open decisions or blockers:** `[HAMZA: add details when implemented]`
 
 
 
 ### Paul — Formatting and Styling
 
-- **Completed work:** `[PAUL: add summary]`
-- **Files changed:** `[PAUL: add links]`
-- **Tests and validation:** `[PAUL: add results]`
-- **Open decisions or blockers:** `[PAUL: add details]`
+- **Completed work:** `[PAUL: add summary when implemented]`
+- **Files changed:** `[PAUL: add links when implemented]`
+- **Tests and validation:** `[PAUL: add results when implemented]`
+- **Open decisions or blockers:** `[PAUL: add details when implemented]`
 
 
 
 ### Waran — Export and Demonstration
 
-- **Completed work:** `[WARAN: add summary]`
-- **Files changed:** `[WARAN: add links]`
-- **Tests and validation:** `[WARAN: add results]`
-- **Open decisions or blockers:** `[WARAN: add details]`
+- **Completed work:** `[WARAN: add summary when implemented]`
+- **Files changed:** `[WARAN: add links when implemented]`
+- **Tests and validation:** `[WARAN: add results when implemented]`
+- **Open decisions or blockers:** `[WARAN: add details when implemented]`
 
 
 
