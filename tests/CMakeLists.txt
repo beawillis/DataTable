@@ -71,3 +71,17 @@ add_test(
     NAME DataTable.group
     COMMAND test_group
 )
+
+add_executable(test_aggregate
+    test_aggregate.cpp
+)
+
+target_link_libraries(test_aggregate
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.aggregate
+    COMMAND test_aggregate
+)
