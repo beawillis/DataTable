@@ -57,3 +57,17 @@ foreach(module IN ITEMS sort filter)
         COMMAND test_${module}
     )
 endforeach()
+
+add_executable(test_group
+    test_group.cpp
+)
+
+target_link_libraries(test_group
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.group
+    COMMAND test_group
+)
