@@ -85,3 +85,19 @@ add_test(
     NAME DataTable.aggregate
     COMMAND test_aggregate
 )
+
+foreach(module IN ITEMS formatter style)
+    add_executable(test_${module}
+        test_${module}.cpp
+    )
+
+    target_link_libraries(test_${module}
+        PRIVATE
+            DataTable::DataTable
+    )
+
+    add_test(
+        NAME DataTable.${module}
+        COMMAND test_${module}
+    )
+endforeach()
