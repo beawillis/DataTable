@@ -101,3 +101,18 @@ foreach(module IN ITEMS formatter style)
         COMMAND test_${module}
     )
 endforeach()
+
+
+add_executable(test_export
+    test_export.cpp
+)
+
+target_link_libraries(test_export
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.export
+    COMMAND test_export
+)
