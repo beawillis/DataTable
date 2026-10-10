@@ -185,11 +185,10 @@ Added the CSV parser regression coverage in [`tests/test_csv.cpp`](../tests/test
 
 ### Waran — Export and Demonstration
 
-- **Completed work:** `[WARAN: add summary]`
-- **Files changed:** `[WARAN: add links]`
-- **Tests and validation:** `[WARAN: add results]`
-- **Open decisions or blockers:** `[WARAN: add details]`
-
+- **Completed work:** Defined the Week 1 CSV and HTML export design and added the stream-based `write_csv` and `write_html` API. Implemented CSV header serialization with field quoting, complete HTML document output with escaped headers, empty-table behavior, and output-stream failure reporting. Nonempty-table export is explicitly rejected until the central `DataTable` exposes row values.
+- **Files changed:** [`EXPORT_DESIGN.md`](../EXPORT_DESIGN.md), [`export.hpp`](../include/datatable/export.hpp), [`export.cpp`](../src/export.cpp), [`test_export.cpp`](../tests/test_export.cpp), and [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Tests and validation:** Added focused tests for CSV header escaping including commas, quotes, CR, and LF; HTML document structure and header escaping; tables with no columns; and failed output streams. Editor diagnostics and `git diff --check` passed. CMake Tools could not configure the project, so the export tests have not been executed.
+- **Open decisions or blockers:** Complete row serialization depends on agreement and integration of a `DataTable` row/column value-access API. The current public table interface exposes column names and row count only. Example integration depends on the stable formatter, CSV, filtering, and grouping APIs.
 
 
 ## 6. Risks and open issues
