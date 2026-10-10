@@ -41,3 +41,17 @@ add_test(
     NAME DataTable.CSV
     COMMAND test_csv
 )
+
+add_executable(test_export
+    test_export.cpp
+)
+
+target_link_libraries(test_export
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.Export
+    COMMAND test_export
+)
