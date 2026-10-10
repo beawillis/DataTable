@@ -1,7 +1,7 @@
 #include "datatable/style.hpp"
 
 namespace datatable {
-
+// Implementation of the Style class methods.
 Alignment Style::alignment() const noexcept
 {
     return alignment_;
