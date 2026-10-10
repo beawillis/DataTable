@@ -42,6 +42,67 @@ add_test(
     COMMAND test_csv
 )
 
+foreach(module IN ITEMS sort filter)
+    add_executable(test_${module}
+        test_${module}.cpp
+    )
+
+    target_link_libraries(test_${module}
+        PRIVATE
+            DataTable::DataTable
+    )
+
+    add_test(
+        NAME DataTable.${module}
+        COMMAND test_${module}
+    )
+endforeach()
+
+add_executable(test_group
+    test_group.cpp
+)
+
+target_link_libraries(test_group
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.group
+    COMMAND test_group
+)
+
+add_executable(test_aggregate
+    test_aggregate.cpp
+)
+
+target_link_libraries(test_aggregate
+    PRIVATE
+        DataTable::DataTable
+)
+
+add_test(
+    NAME DataTable.aggregate
+    COMMAND test_aggregate
+)
+
+foreach(module IN ITEMS formatter style)
+    add_executable(test_${module}
+        test_${module}.cpp
+    )
+
+    target_link_libraries(test_${module}
+        PRIVATE
+            DataTable::DataTable
+    )
+
+    add_test(
+        NAME DataTable.${module}
+        COMMAND test_${module}
+    )
+endforeach()
+
+
 add_executable(test_export
     test_export.cpp
 )
@@ -52,6 +113,6 @@ target_link_libraries(test_export
 )
 
 add_test(
-    NAME DataTable.Export
+    NAME DataTable.export
     COMMAND test_export
 )

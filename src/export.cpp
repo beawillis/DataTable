@@ -11,6 +11,7 @@ namespace {
 
 void ensure_writable(const std::ostream& output)
 {
+	// Fail before writing when the caller supplied an unusable stream.
 	if (!output) {
 		throw std::ios_base::failure("Export output stream is not writable.");
 	}
@@ -18,6 +19,7 @@ void ensure_writable(const std::ostream& output)
 
 void ensure_schema_only(const DataTable& table)
 {
+	// Week 1 exports can safely write column names, but not hidden row data.
 	if (table.rowCount() != 0) {
 		throw std::logic_error(
 			"DataTable row values are not exposed to the export module yet."
@@ -27,6 +29,7 @@ void ensure_schema_only(const DataTable& table)
 
 std::string csv_field(const std::string& value)
 {
+	// CSV fields containing separators or line breaks must be quoted.
 	if (value.find_first_of(",\"\r\n") == std::string::npos) {
 		return value;
 	}
@@ -46,6 +49,7 @@ std::string csv_field(const std::string& value)
 
 void write_html_escaped(const std::string& value, std::ostream& output)
 {
+	// Escape markup-sensitive characters so column names remain safe HTML text.
 	for (const char character : value) {
 		switch (character) {
 		case '&': output << "&amp;"; break;
@@ -67,6 +71,7 @@ void write_csv(const DataTable& table, std::ostream& output)
 
 	const auto& names = table.columnNames();
 	if (!names.empty()) {
+		// Emit one escaped header row; row data is not exposed yet.
 		for (std::size_t index = 0; index < names.size(); ++index) {
 			if (index != 0) {
 				output.put(',');
@@ -84,6 +89,7 @@ void write_html(const DataTable& table, std::ostream& output)
 	ensure_writable(output);
 	ensure_schema_only(table);
 
+	// Build a complete HTML document containing the current column headers.
 	output << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
 			  "<meta charset=\"UTF-8\">\n<title>DataTable Export</title>\n"
 			  "</head>\n<body>\n<table>\n<thead>\n<tr>";
