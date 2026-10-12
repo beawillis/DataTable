@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "datatable/column.hpp"
+#include "datatable/row.hpp"
+
 namespace datatable {
 
 /**
@@ -49,17 +52,26 @@ public:
      */
     const std::vector<std::string>& columnNames() const noexcept;
 
-    /**
-     * @brief Add a column name to the table schema.
-     *
-     * This is part of the initial architecture and will later
-     * be connected to the typed Column implementation.
-     */
+    // Add a named column; adding columns after rows exist is rejected.
     void addColumn(const std::string& name);
+
+    // Add a row whose width matches the current number of columns.
+    void addRow(const Row& row);
+
+    const std::vector<Row>& rows() const noexcept;
+    const std::vector<Column>& columns() const noexcept;
+
+    Column& column(std::size_t index);
+    const Column& column(std::size_t index) const;
+
+    Column& column(const std::string& name);
+    const Column& column(const std::string& name) const;
 
 private:
 
     std::vector<std::string> column_names_;
+    std::vector<Column> columns_;
+    std::vector<Row> rows_;
     std::size_t row_count_;
 };
 
