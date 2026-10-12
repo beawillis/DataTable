@@ -116,6 +116,35 @@ void test_invalid_schema_operations()
     assert(missing_column_rejected);
 }
 
+void test_csv_integration()
+{
+    const DataTable table = DataTable::fromCsv(
+        "Name,Age,Active,Score\n"
+        "Ada,36,true,98.5\n"
+        "Grace,28,false,91.25\n"
+    );
+
+    assert(table.columnCount() == 4);
+    assert(table.rowCount() == 2);
+    assert(table.column("Name")[0].get<std::string>() == "Ada");
+    assert(table.column("Age")[1].get<std::int64_t>() == 28);
+    assert(table.column("Active")[1].get<bool>() == false);
+    assert(table.column("Score")[0].get<double>() == 98.5);
+}
+
+void test_csv_width_validation()
+{
+    bool exception_thrown = false;
+    try {
+        (void)DataTable::fromCsv("Name,Age\nAda\n");
+    }
+    catch (const std::invalid_argument&) {
+        exception_thrown = true;
+    }
+
+    assert(exception_thrown);
+}
+
 int main()
 {
     test_empty_table();
@@ -124,6 +153,8 @@ int main()
     test_clear();
     test_add_rows_and_access_columns();
     test_invalid_schema_operations();
+    test_csv_integration();
+    test_csv_width_validation();
 
     std::cout << "All DataTable core tests passed.\n";
 

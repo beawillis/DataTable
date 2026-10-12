@@ -6,8 +6,8 @@
 ## 1. Week 2 objective
 
 Connect the central `DataTable` class to the typed `Row` and `Column` data
-model so the rest of the library can access real table values through one
-shared public API.
+model, integrate parsed CSV records, and provide basic table operations
+through one shared public API.
 
 ## 2. Elisha's work completed
 
@@ -44,6 +44,22 @@ Extended [`tests/test_table.cpp`](../tests/test_table.cpp) to verify:
 - duplicate names are rejected;
 - mismatched row widths are rejected; and
 - missing column names raise `std::out_of_range`.
+
+### 2.3 CSV integration through the table module
+
+The CSV module remains responsible only for parsing text into `CsvData`.
+To keep ownership boundaries clear, the integration is implemented in the
+table-owned files through `DataTable::fromCsv()`. This factory:
+
+- calls the existing `parseCsv()` function;
+- treats the first CSV record as column headers;
+- converts fields into typed `Cell` values;
+- inserts the schema with `addColumn()`;
+- inserts records with `addRow()`; and
+- rejects records whose width does not match the header.
+
+This means `csv.hpp` and `csv.cpp` do not create or own a second table
+representation. `DataTable` remains the single owner of rows and columns.
 
 ## 3. Class structure and implementation
 
@@ -87,6 +103,10 @@ access, append, and clear functions. `Column` privately owns its `name_` and
 `cells_`, and exposes public name, access, append, and clear functions.
 `DataTable::addRow()` uses those public interfaces to keep both views of the
 same table synchronized.
+
+`DataTable::fromCsv()` is a public static factory because it creates a new
+table from parsed input. Its conversion helper is private to `table.cpp`;
+callers use the public factory without depending on conversion details.
 
 ## 4. Design decisions and limitations
 
