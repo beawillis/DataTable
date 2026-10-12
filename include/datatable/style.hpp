@@ -1,11 +1,11 @@
 #ifndef DATATABLE_STYLE_HPP
 #define DATATABLE_STYLE_HPP
 
-#include <cstddef>
+#include <cstddef> // std::size_t
 
 namespace datatable {
 
-enum class Alignment
+enum class Alignment // Specifies the alignment of text within a cell
 {
     left,
     center,
