@@ -2,7 +2,7 @@
 
 **Reporting period:** Week 1
 **Project:** C++ Data Table Formatting and Presentation Library
-**Report owner:** Elisha — Table-Core Engineer
+**Report owner:** Elisha — Table-Core
 
 ## 1. Week 1 objective
 
