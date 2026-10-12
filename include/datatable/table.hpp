@@ -2,6 +2,7 @@
 #define DATATABLE_TABLE_HPP
 
 #include <cstddef>
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,10 @@ public:
      * @brief Construct an empty DataTable.
      */
     DataTable();
+
+    // Build a typed table from CSV records using the existing CSV parser.
+    static DataTable fromCsv(std::istream& input);
+    static DataTable fromCsv(const std::string& input);
 
     /**
      * @brief Return the number of rows in the table.
