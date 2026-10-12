@@ -1,9 +1,74 @@
 #include "datatable/csv.hpp"
 
+#include "datatable/table.hpp"
+
+#include <cerrno>
+#include <cctype>
+#include <cstdint>
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace datatable {
+namespace {
+
+Cell cellFromCsvField(const std::string& field)
+{
+	if (field.empty()) {
+		return Cell(nullptr);
+	}
+
+	// Preserve whitespace because it is part of the CSV field value.
+	if (std::isspace(static_cast<unsigned char>(field.front())) ||
+		std::isspace(static_cast<unsigned char>(field.back()))) {
+		return Cell(field);
+	}
+
+	if (field == "true") {
+		return Cell(true);
+	}
+
+	if (field == "false") {
+		return Cell(false);
+	}
+
+	// Keep integer cells exact; use double only for non-integer numeric fields.
+	char* integerEnd = nullptr;
+	errno = 0;
+	const long long integer = std::strtoll(field.c_str(), &integerEnd, 10);
+	if (integerEnd != field.c_str() && *integerEnd == '\0') {
+		if (errno != ERANGE) {
+			return Cell(static_cast<std::int64_t>(integer));
+		}
+
+		// Keep unsigned integer precision when the value exceeds INT64_MAX.
+		if (field.front() != '-') {
+			char* unsignedEnd = nullptr;
+			errno = 0;
+			const unsigned long long unsignedInteger =
+				std::strtoull(field.c_str(), &unsignedEnd, 10);
+			if (unsignedEnd != field.c_str() && *unsignedEnd == '\0' &&
+				errno != ERANGE) {
+				return Cell(static_cast<std::uint64_t>(unsignedInteger));
+			}
+		}
+
+		return Cell(field);
+	}
+
+	char* numberEnd = nullptr;
+	errno = 0;
+	const double number = std::strtod(field.c_str(), &numberEnd);
+	if (numberEnd != field.c_str() && *numberEnd == '\0' &&
+		errno != ERANGE) {
+		return Cell(number);
+	}
+
+	return Cell(field);
+}
+
+} // namespace
 
 CsvData parseCsv(std::istream& input)
 {
@@ -92,6 +157,48 @@ CsvData parseCsv(const std::string& input)
 {
 	std::istringstream stream(input);
 	return parseCsv(stream);
+}
+
+DataTable DataTable::fromCsv(std::istream& input)
+{
+	const CsvData records = parseCsv(input);
+	DataTable table;
+
+	if (records.empty()) {
+		return table;
+	}
+
+	// The first parsed record is the schema; later records become table rows.
+	for (const std::string& header : records.front()) {
+		table.addColumn(header);
+	}
+
+	for (std::size_t recordIndex = 1;
+		 recordIndex < records.size();
+		 ++recordIndex) {
+		const CsvRecord& record = records[recordIndex];
+		if (record.size() != records.front().size()) {
+			// Reject ragged input instead of building a misaligned table.
+			throw std::invalid_argument(
+				"CSV record width does not match the header width."
+			);
+		}
+
+		std::vector<Cell> cells;
+		cells.reserve(record.size());
+		for (const std::string& field : record) {
+			cells.emplace_back(cellFromCsvField(field));
+		}
+		table.addRow(Row(std::move(cells)));
+	}
+
+	return table;
+}
+
+DataTable DataTable::fromCsv(const std::string& input)
+{
+	std::istringstream stream(input);
+	return fromCsv(stream);
 }
 
 } // namespace datatable

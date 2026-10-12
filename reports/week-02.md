@@ -45,21 +45,25 @@ Extended [`tests/test_table.cpp`](../tests/test_table.cpp) to verify:
 - mismatched row widths are rejected; and
 - missing column names raise `std::out_of_range`.
 
-### 2.3 CSV integration through the table module
+### 2.3 CSV-to-table loading — Daniel
 
-The CSV module remains responsible only for parsing text into `CsvData`.
-To keep ownership boundaries clear, the integration is implemented in the
-table-owned files through `DataTable::fromCsv()`. This factory:
+Daniel implemented the CSV loading path in the CSV module's
+[`src/csv.cpp`](../src/csv.cpp), using the shared
+[`DataTable::fromCsv()`](../include/datatable/table.hpp) interface agreed with
+the table-core owner. The implementation reuses `parseCsv()`, treats the
+first record as the column headers, converts subsequent fields to typed
+`Cell` values, and inserts rows through the existing `DataTable` API. It does
+not introduce a second table representation or change the shared table
+interface.
 
-- calls the existing `parseCsv()` function;
-- treats the first CSV record as column headers;
-- converts fields into typed `Cell` values;
-- inserts the schema with `addColumn()`;
-- inserts records with `addRow()`; and
-- rejects records whose width does not match the header.
-
-This means `csv.hpp` and `csv.cpp` do not create or own a second table
-representation. `DataTable` remains the single owner of rows and columns.
+Empty fields become null cells; exact `true` and `false` values become
+booleans; supported signed and unsigned 64-bit integer fields retain their
+integer types; other valid numeric fields become doubles; and remaining
+fields stay strings. Leading or trailing whitespace is preserved, and
+integers outside the supported 64-bit range remain strings rather than being
+rounded into doubles. Records whose width differs from the header are
+rejected. Integration tests are in
+[`tests/test_csv.cpp`](../tests/test_csv.cpp).
 
 ## 3. Class structure and implementation
 
@@ -133,6 +137,7 @@ DataTable tests: passed
    and export owners before changing shared interfaces further.
 3. Add table-level integration tests for those modules.
 
+
 ## 7. Primah - typed data model
 
 ### 7.1 Week 2 objective
@@ -174,3 +179,51 @@ not provide <variant>, which is required by this C++17 data model.
 
 The typed data-model implementation is present in the current branch; no
 additional public-interface changes were needed for this report update.
+
+
+### Manige Daniel — CSV / Data I/O
+
+- **Completed work:** Implemented the CSV-to-table loading path through
+  `DataTable::fromCsv()`, using the existing `parseCsv()` parser and shared
+  `Cell`, `Row`, and `Column` data model. The first CSV record defines the
+  column names; each subsequent record becomes a typed table row. Empty
+  fields become null cells, exact `true` and `false` values become booleans,
+  supported signed and unsigned 64-bit integers retain integer types, other
+  valid numeric fields become doubles, and remaining fields stay strings.
+  Leading or trailing whitespace is preserved, and integer values outside
+  the supported 64-bit range are kept as strings rather than rounded.
+  Records with a different number of fields from the header are rejected.
+
+- **Files changed:** [`csv.cpp`](../src/csv.cpp) implements field conversion
+  and the `DataTable::fromCsv()` overloads declared in the shared
+  [`table.hpp`](../include/datatable/table.hpp).
+  [`test_csv.cpp`](../tests/test_csv.cpp) covers both CSV parsing and
+  CSV-to-table integration. The existing factory definitions were moved out
+  of [`table.cpp`](../src/table.cpp) into the CSV module; the shared
+  [`table.hpp`](../include/datatable/table.hpp) API was not changed.
+
+- **Tests and validation:** Added integration coverage for empty input,
+  header-only input, stream and string input, typed values, quoted commas,
+  embedded newlines, null fields, signed and unsigned integer boundaries,
+  whitespace preservation, and mismatched row widths. CMake Tools could not
+  configure the project during this report update, so the tests could not be
+  executed.
+
+#### Class structure and implementation
+
+CSV loading constructs the existing `DataTable` rather than introducing a
+new CSV-specific table class.
+
+- **Public entry points:** `DataTable::fromCsv(std::istream&)` loads CSV from
+  a stream, while `DataTable::fromCsv(const std::string&)` provides a
+  string-input convenience overload and delegates to the stream overload.
+- **Data and conversion:** The factory calls `parseCsv()`, uses the first
+  parsed record as the schema, converts subsequent string fields into `Cell`
+  values, constructs `Row` objects, and adds them through the table's
+  validation methods. The table continues to own and synchronize its rows
+  and columns.
+- **Validation and ownership:** Header names and row widths are checked by
+  the existing `DataTable` operations, and CSV records with mismatched widths
+  raise `std::invalid_argument`. Field conversion is implemented within the
+  CSV module, which uses the shared table API to populate the table. The table
+  remains responsible for owning rows and columns.
