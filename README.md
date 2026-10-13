@@ -201,8 +201,6 @@ Explain the group's development workflow:
 | 7 | Waran Newton Mono Korsuk | 25/X/08621/PS |
 | 8 | Mwanje Hamuza Tendo | 25/U/05654/PS |
 
-**Programme:** BCCE
-
 ## 15. AI Use Declaration
 
 Document AI tools used during development, their purposes, the relevant team members' use, and how any suggestions were verified. Follow the project's academic instructions and ensure this declaration accurately reflects the team's work.
