@@ -1,53 +1,10 @@
 #include "datatable/table.hpp"
 
-#include "datatable/csv.hpp"
-
 #include <algorithm>
-#include <cerrno>
-#include <cstdlib>
-#include <sstream>
 #include <stdexcept>
 #include <utility>
 
 namespace datatable {
-namespace {
-
-Cell cellFromCsvField(const std::string& field)
-{
-    if (field.empty()) {
-        return Cell(nullptr);
-    }
-
-    if (field == "true") {
-        return Cell(true);
-    }
-
-    if (field == "false") {
-        return Cell(false);
-    }
-
-    char* integerEnd = nullptr;
-    errno = 0;
-    const long long integer =
-        std::strtoll(field.c_str(), &integerEnd, 10);
-    if (integerEnd != field.c_str() && *integerEnd == '\0' &&
-        errno != ERANGE) {
-        return Cell(static_cast<std::int64_t>(integer));
-    }
-
-    char* numberEnd = nullptr;
-    errno = 0;
-    const double number =
-        std::strtod(field.c_str(), &numberEnd);
-    if (numberEnd != field.c_str() && *numberEnd == '\0' &&
-        errno != ERANGE) {
-        return Cell(number);
-    }
-
-    return Cell(field);
-}
-
-} // namespace
 
 DataTable::DataTable()
     : column_names_{},
@@ -55,47 +12,6 @@ DataTable::DataTable()
       rows_{},
       row_count_{0}
 {
-}
-
-DataTable DataTable::fromCsv(std::istream& input)
-{
-    const CsvData records = parseCsv(input);
-    DataTable table;
-
-    if (records.empty()) {
-        return table;
-    }
-
-    // The first CSV record defines the table schema.
-    for (const std::string& header : records.front()) {
-        table.addColumn(header);
-    }
-
-    for (std::size_t recordIndex = 1;
-         recordIndex < records.size();
-         ++recordIndex) {
-        const CsvRecord& record = records[recordIndex];
-        if (record.size() != records.front().size()) {
-            throw std::invalid_argument(
-                "CSV record width does not match the header width."
-            );
-        }
-
-        std::vector<Cell> cells;
-        cells.reserve(record.size());
-        for (const std::string& field : record) {
-            cells.emplace_back(cellFromCsvField(field));
-        }
-        table.addRow(Row(std::move(cells)));
-    }
-
-    return table;
-}
-
-DataTable DataTable::fromCsv(const std::string& input)
-{
-    std::istringstream stream(input);
-    return fromCsv(stream);
 }
 
 std::size_t DataTable::rowCount() const noexcept

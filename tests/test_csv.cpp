@@ -1,12 +1,16 @@
 #include <cassert>
+#include <cstdint>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
 #include "datatable/csv.hpp"
+#include "datatable/table.hpp"
 
 using datatable::CsvData;
+using datatable::DataTable;
 using datatable::parseCsv;
 
 void test_plain_records_and_empty_fields()
@@ -59,6 +63,83 @@ void test_malformed_quotes_are_rejected()
 	}
 }
 
+void test_csv_to_table_loading()
+{
+	// Verify that CSV fields become typed cells in the shared DataTable.
+	const DataTable table = DataTable::fromCsv(
+		"Name,Age,Active,Score,Note\n"
+		"Ada,36,true,98.5,\n"
+		"Grace,28,false,91.25,ready\n"
+	);
+
+	assert(table.columnCount() == 5);
+	assert(table.rowCount() == 2);
+	assert(table.column("Name")[0].get<std::string>() == "Ada");
+	assert(table.column("Age")[1].get<std::int64_t>() == 28);
+	assert(table.column("Active")[1].get<bool>() == false);
+	assert(table.column("Score")[0].get<double>() == 98.5);
+	assert(table.column("Note")[0].isNull());
+}
+
+void test_csv_to_table_quoted_values_and_header_only()
+{
+	const DataTable empty = DataTable::fromCsv("");
+	assert(empty.empty());
+	assert(empty.columnCount() == 0);
+
+	const DataTable header_only = DataTable::fromCsv("Name,Note\n");
+	assert(header_only.columnCount() == 2);
+	assert(header_only.rowCount() == 0);
+
+	const DataTable table = DataTable::fromCsv(
+		"Name,Note\n"
+		"\"Lovelace, Ada\",\"line 1\nline 2\"\n"
+	);
+	assert(table.rowCount() == 1);
+	assert(table.rows()[0][0].get<std::string>() == "Lovelace, Ada");
+	assert(table.rows()[0][1].get<std::string>() == "line 1\nline 2");
+}
+
+void test_csv_to_table_numeric_boundaries_and_whitespace()
+{
+	// Ensure integer limits stay exact and field whitespace is not discarded.
+	const std::string largest_unsigned =
+		std::to_string((std::numeric_limits<std::uint64_t>::max)());
+	const std::string smallest_signed =
+		std::to_string((std::numeric_limits<std::int64_t>::min)());
+	const std::string beyond_unsigned = largest_unsigned + "0";
+	const std::string below_signed = "-" + largest_unsigned + "0";
+	const DataTable table = DataTable::fromCsv(
+		"unsigned,large,spaced,min_signed,below_signed\n" +
+		largest_unsigned + "," + beyond_unsigned + ", 7," +
+		smallest_signed + "," + below_signed + "\n"
+	);
+
+	assert(table.rows()[0][0].get<std::uint64_t>() ==
+		(std::numeric_limits<std::uint64_t>::max)());
+	assert(table.rows()[0][1].get<std::string>() == beyond_unsigned);
+	assert(table.rows()[0][2].get<std::string>() == " 7");
+	assert(table.rows()[0][3].get<std::int64_t>() ==
+		(std::numeric_limits<std::int64_t>::min)());
+	assert(table.rows()[0][4].get<std::string>() == below_signed);
+}
+
+void test_csv_to_table_stream_and_width_validation()
+{
+	std::istringstream input("Name,Age\nAda,36\n");
+	const DataTable table = DataTable::fromCsv(input);
+	assert(table.rowCount() == 1);
+	assert(table.column("Age")[0].get<std::int64_t>() == 36);
+
+	bool exception_thrown = false;
+	try {
+		(void)DataTable::fromCsv("Name,Age\nAda\n");
+	} catch (const std::invalid_argument&) {
+		exception_thrown = true;
+	}
+	assert(exception_thrown);
+}
+
 int main()
 {
 	test_plain_records_and_empty_fields();
@@ -66,7 +147,11 @@ int main()
 	test_escaped_quotes_and_trailing_delimiter();
 	test_stream_input_and_empty_input();
 	test_malformed_quotes_are_rejected();
+	test_csv_to_table_loading();
+	test_csv_to_table_quoted_values_and_header_only();
+	test_csv_to_table_numeric_boundaries_and_whitespace();
+	test_csv_to_table_stream_and_width_validation();
 
-	std::cout << "All CSV parser tests passed.\n";
+	std::cout << "All CSV tests passed.\n";
 	return 0;
 }
