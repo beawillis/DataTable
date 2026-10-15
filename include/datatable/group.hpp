@@ -9,6 +9,8 @@
 
 namespace datatable {
 
+class DataTable;
+
 // Stores one distinct grouping key and the number of values assigned to it.
 class Group
 {
@@ -32,6 +34,9 @@ using GroupedColumn = std::vector<Group>;
 
 // Group equal cells while preserving the order of first appearance.
 GroupedColumn groupBy(const Column& column);
+
+// Group values from a selected DataTable column without modifying the table.
+GroupedColumn groupBy(const DataTable& table, std::size_t column_index);
 
 } // namespace datatable
 
