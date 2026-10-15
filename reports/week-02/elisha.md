@@ -45,21 +45,25 @@ Extended [`tests/test_table.cpp`](../../tests/test_table.cpp) to verify:
 - mismatched row widths are rejected; and
 - missing column names raise `std::out_of_range`.
 
-### 2.3 CSV integration through the table module
+### 2.3 CSV-to-table loading — Daniel
 
-The CSV module remains responsible only for parsing text into `CsvData`.
-To keep ownership boundaries clear, the integration is implemented in the
-table-owned files through `DataTable::fromCsv()`. This factory:
+Daniel implemented the CSV loading path in the CSV module's
+[`src/csv.cpp`](../../src/csv.cpp), using the shared
+[`DataTable::fromCsv()`](../../include/datatable/table.hpp) interface agreed with
+the table-core owner. The implementation reuses `parseCsv()`, treats the
+first record as the column headers, converts subsequent fields to typed
+`Cell` values, and inserts rows through the existing `DataTable` API. It does
+not introduce a second table representation or change the shared table
+interface.
 
-- calls the existing `parseCsv()` function;
-- treats the first CSV record as column headers;
-- converts fields into typed `Cell` values;
-- inserts the schema with `addColumn()`;
-- inserts records with `addRow()`; and
-- rejects records whose width does not match the header.
-
-This means `csv.hpp` and `csv.cpp` do not create or own a second table
-representation. `DataTable` remains the single owner of rows and columns.
+Empty fields become null cells; exact `true` and `false` values become
+booleans; supported signed and unsigned 64-bit integer fields retain their
+integer types; other valid numeric fields become doubles; and remaining
+fields stay strings. Leading or trailing whitespace is preserved, and
+integers outside the supported 64-bit range remain strings rather than being
+rounded into doubles. Records whose width differs from the header are
+rejected. Integration tests are in
+[`tests/test_csv.cpp`](../../tests/test_csv.cpp).
 
 ## 3. Class structure and implementation
 
@@ -159,4 +163,3 @@ DataTable tests: passed
 2. Coordinate with CSV, sorting/filtering, grouping, aggregation, formatting,
    and export owners before changing shared interfaces further.
 3. Add table-level integration tests for those modules.
-
