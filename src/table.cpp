@@ -86,6 +86,28 @@ void DataTable::addRow(const Row& row)
     row_count_ = rows_.size();
 }
 
+void DataTable::replaceRows(const std::vector<Row>& rows)
+{
+    for (const Row& row : rows) {
+        if (row.size() != columns_.size()) {
+            throw std::invalid_argument(
+                "Row width must match the number of table columns."
+            );
+        }
+    }
+
+    rows_ = rows;
+    for (Column& column : columns_) {
+        column.clear();
+    }
+    for (const Row& row : rows_) {
+        for (std::size_t index = 0; index < columns_.size(); ++index) {
+            columns_[index].append(row[index]);
+        }
+    }
+    row_count_ = rows_.size();
+}
+
 const std::vector<Row>& DataTable::rows() const noexcept
 {
     return rows_;
