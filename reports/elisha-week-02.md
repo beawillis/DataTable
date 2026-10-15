@@ -108,7 +108,34 @@ same table synchronized.
 table from parsed input. Its conversion helper is private to `table.cpp`;
 callers use the public factory without depending on conversion details.
 
-## 4. Design decisions and limitations
+## 4. Implemented object-oriented design
+
+### Composition
+
+`DataTable` uses `Row` and `Column` through composition: it stores
+`std::vector<Row>` and `std::vector<Column>` as private data members. A
+`Row` and a `Column` each store `Cell` objects. This matches the actual
+relationship in the program because a table is made up of rows and columns,
+and rows and columns are made up of cells.
+
+### Encapsulation
+
+Encapsulation is used throughout the data model:
+
+- `DataTable` privately owns `column_names_`, `columns_`, `rows_`, and
+  `row_count_`.
+- `Row` privately owns its `cells_`.
+- `Column` privately owns its name and cell storage.
+- `Cell` privately owns its `CellValue`.
+
+The public member functions control how those values are changed or read.
+For example, `DataTable::addRow()` checks the row width and updates both the
+row and column views together. Callers cannot directly modify the private
+vectors and accidentally make the table inconsistent. Invalid column names,
+duplicate names, late schema changes, and incorrect row widths are reported
+with exceptions.
+
+## 5. Design decisions and limitations
 
 - A row must have exactly the same number of cells as the current schema.
 - Column names must be non-empty and unique.
@@ -119,14 +146,14 @@ callers use the public factory without depending on conversion details.
 - The table currently exposes read-only collections through `rows()` and
   `columns()`; mutation goes through `addColumn()`, `addRow()`, and `clear()`.
 
-## 5. Validation
+## 6. Validation
 
 ```text
 Build: successful
 DataTable tests: passed
 ```
 
-## 6. Next steps
+## 7. Next steps
 
 1. Update dependent modules to consume the integrated table rows and columns.
 2. Coordinate with CSV, sorting/filtering, grouping, aggregation, formatting,
