@@ -1,5 +1,7 @@
 #include "datatable/sort.hpp"
 
+#include "datatable/table.hpp"
+
 #include <algorithm>
 #include <cstdint>
 #include <type_traits>
@@ -80,6 +82,27 @@ Column sortColumn(const Column& column, SortOrder order)
         });
 
     return Column(column.name(), std::move(sorted));
+}
+
+void sortByColumn(DataTable& table, std::size_t column_index, SortOrder order)
+{
+    // column() validates the requested index before any table changes occur.
+    (void)table.column(column_index);
+
+    std::vector<Row> sorted_rows = table.rows();
+    std::stable_sort(
+        sorted_rows.begin(),
+        sorted_rows.end(),
+        [column_index, order](const Row& left, const Row& right) {
+            const Cell& left_cell = left.at(column_index);
+            const Cell& right_cell = right.at(column_index);
+            if (order == SortOrder::ascending) {
+                return cellLess(left_cell, right_cell);
+            }
+            return cellLess(right_cell, left_cell);
+        });
+
+    table.replaceRows(sorted_rows);
 }
 
 } // namespace datatable

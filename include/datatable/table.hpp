@@ -63,6 +63,9 @@ public:
     // Add a row whose width matches the current number of columns.
     void addRow(const Row& row);
 
+    // Replace the row order while keeping the column view synchronized.
+    void replaceRows(const std::vector<Row>& rows);
+
     const std::vector<Row>& rows() const noexcept;
     const std::vector<Column>& columns() const noexcept;
 
