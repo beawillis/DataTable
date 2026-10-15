@@ -27,8 +27,8 @@ modules can build on.
 ### 2.2 Initial `DataTable` core API
 
 Implemented the first central table interface in
-[`include/datatable/table.hpp`](../include/datatable/table.hpp) and
-[`src/table.cpp`](../src/table.cpp):
+[`include/datatable/table.hpp`](../../include/datatable/table.hpp) and
+[`src/table.cpp`](../../src/table.cpp):
 
 - Construction of an empty table.
 - `rowCount()` and `columnCount()` queries.
@@ -46,7 +46,7 @@ agreed shared interfaces in the next implementation stages.
 ### 2.3 Core tests
 
 Added the initial table tests in
-[`tests/test_table.cpp`](../tests/test_table.cpp), covering:
+[`tests/test_table.cpp`](../../tests/test_table.cpp), covering:
 
 - Construction and empty-table state.
 - Adding and reading column names.
@@ -123,19 +123,19 @@ the relevant owner and Elisha first.
   ordered sequence of cells and validates its required name. Both provide
   size/empty queries, checked indexed access, append, and clear operations.
 
-- **Files changed:** [`cell.hpp`](../include/datatable/cell.hpp),
-  [`cell.cpp`](../src/cell.cpp), [`row.hpp`](../include/datatable/row.hpp),
-  [`row.cpp`](../src/row.cpp), [`column.hpp`](../include/datatable/column.hpp),
-  [`column.cpp`](../src/column.cpp), and focused tests in
-  [`test_cell.cpp`](../tests/test_cell.cpp),
-  [`test_row.cpp`](../tests/test_row.cpp), and
-  [`test_column.cpp`](../tests/test_column.cpp).
+- **Files changed:** [`cell.hpp`](../../include/datatable/cell.hpp),
+  [`cell.cpp`](../../src/cell.cpp), [`row.hpp`](../../include/datatable/row.hpp),
+  [`row.cpp`](../../src/row.cpp), [`column.hpp`](../../include/datatable/column.hpp),
+  [`column.cpp`](../../src/column.cpp), and focused tests in
+  [`test_cell.cpp`](../../tests/test_cell.cpp),
+  [`test_row.cpp`](../../tests/test_row.cpp), and
+  [`test_column.cpp`](../../tests/test_column.cpp).
 
 - **Tests and validation:** Added focused coverage for supported cell types,
   null and string handling, formatting and invalid typed access; row and
   column construction, mutation, clearing, and bounds errors; and empty column
   names. The tests are registered as `DataTable.cell`, `DataTable.row`, and
-  `DataTable.column` in [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+  `DataTable.column` in [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
   CMake Tools could not configure the project during this report update, so
   these tests were not executed.
 - **Open decisions or blockers:** Agree with Elisha on how these standalone
@@ -179,8 +179,8 @@ validation rules.
 #### 2.1 CSV parsing foundation
 
 - Investigated and implemented the CSV input layer for the DataTable project.
-- Added the public CSV interface in [`include/datatable/csv.hpp`](../include/datatable/csv.hpp).
-- Implemented the parsing logic in [`src/csv.cpp`](../src/csv.cpp).
+- Added the public CSV interface in [`include/datatable/csv.hpp`](../../include/datatable/csv.hpp).
+- Implemented the parsing logic in [`src/csv.cpp`](../../src/csv.cpp).
 - Supported the required CSV behaviors for:
   - plain records and empty fields
   - quoted values containing commas
@@ -191,7 +191,7 @@ validation rules.
 
 #### 2.2 Data ingestion tests
 
-Added the CSV parser regression coverage in [`tests/test_csv.cpp`](../tests/test_csv.cpp), including:
+Added the CSV parser regression coverage in [`tests/test_csv.cpp`](../../tests/test_csv.cpp), including:
 
 - parsing standard comma-delimited output
 - preserving empty values and blank records
@@ -248,11 +248,11 @@ program.
   descending order, and filtering supports predicates and exact value matches.
   Numeric cells are compared numerically, strings lexicographically, nulls
   before non-null values, and mixed types deterministically by variant order.
-- **Files changed:** [`sort.hpp`](../include/datatable/sort.hpp),
-  [`sort.cpp`](../src/sort.cpp), [`filter.hpp`](../include/datatable/filter.hpp),
-  [`filter.cpp`](../src/filter.cpp), [`test_sort.cpp`](../tests/test_sort.cpp),
-  [`test_filter.cpp`](../tests/test_filter.cpp), and
-  [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Files changed:** [`sort.hpp`](../../include/datatable/sort.hpp),
+  [`sort.cpp`](../../src/sort.cpp), [`filter.hpp`](../../include/datatable/filter.hpp),
+  [`filter.cpp`](../../src/filter.cpp), [`test_sort.cpp`](../../tests/test_sort.cpp),
+  [`test_filter.cpp`](../../tests/test_filter.cpp), and
+  [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
 - **Tests and validation:** Added tests for ascending and descending sorting,
   source-column preservation, exact filtering, predicate filtering, and
   filtered result contents. The project configured and built successfully.
@@ -340,9 +340,9 @@ safe until `DataTable` exposes integrated rows and columns.
   repeated values, and preserves the order in which keys first appear. The
   grouping operation does not modify the source column.
 
-- **Files changed:** [`group.hpp`](../include/datatable/group.hpp),
-  [`group.cpp`](../src/group.cpp), [`test_group.cpp`](../tests/test_group.cpp),
-  and [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Files changed:** [`group.hpp`](../../include/datatable/group.hpp),
+  [`group.cpp`](../../src/group.cpp), [`test_group.cpp`](../../tests/test_group.cpp),
+  and [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
 
 - **Tests and validation:** Added coverage for distinct keys, repeated-key
   counts, first-seen group order, and preservation of the input column.
@@ -392,10 +392,10 @@ group result while public accessors make it usable by the rest of the program.
   unsigned integers, or floating-point values. Invalid string aggregation is
   rejected explicitly with `std::invalid_argument`.
 
-- **Files changed:** [`aggregate.hpp`](../include/datatable/aggregate.hpp),
-  [`aggregate.cpp`](../src/aggregate.cpp),
-  [`test_aggregate.cpp`](../tests/test_aggregate.cpp), and
-  [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Files changed:** [`aggregate.hpp`](../../include/datatable/aggregate.hpp),
+  [`aggregate.cpp`](../../src/aggregate.cpp),
+  [`test_aggregate.cpp`](../../tests/test_aggregate.cpp), and
+  [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
 
 - **Tests and validation:** Added tests for non-null counting, null-aware sum
   and mean, minimum and maximum values, and rejection of non-numeric input.
@@ -445,11 +445,11 @@ validation and ownership while exposing a small usable API.
   stores presentation choices separately so formatting does not modify the
   source values.
 
-- **Files changed:** [`formatter.hpp`](../include/datatable/formatter.hpp),
-  [`formatter.cpp`](../src/formatter.cpp), [`style.hpp`](../include/datatable/style.hpp),
-  [`style.cpp`](../src/style.cpp), [`test_formatter.cpp`](../tests/test_formatter.cpp),
-  [`test_style.cpp`](../tests/test_style.cpp), and
-  [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Files changed:** [`formatter.hpp`](../../include/datatable/formatter.hpp),
+  [`formatter.cpp`](../../src/formatter.cpp), [`style.hpp`](../../include/datatable/style.hpp),
+  [`style.cpp`](../../src/style.cpp), [`test_formatter.cpp`](../../tests/test_formatter.cpp),
+  [`test_style.cpp`](../../tests/test_style.cpp), and
+  [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
 
 - **Tests and validation:** Added tests for default headers, borders, padding,
   alignment settings, compact output, and preservation of the source column.
@@ -504,9 +504,9 @@ rest of the program.
   Both functions validate the output stream and explicitly reject non-empty
   tables until row values are exposed by `DataTable`.
   
-- **Files changed:** [`export.hpp`](../include/datatable/export.hpp),
-  [`export.cpp`](../src/export.cpp), [`test_export.cpp`](../tests/test_export.cpp),
-  and [`tests/CMakeLists.txt`](../tests/CMakeLists.txt).
+- **Files changed:** [`export.hpp`](../../include/datatable/export.hpp),
+  [`export.cpp`](../../src/export.cpp), [`test_export.cpp`](../../tests/test_export.cpp),
+  and [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
 
 - **Tests and validation:** The export tests cover CSV quoting for commas,
   quotes, carriage returns, and newlines; HTML escaping; empty tables;
