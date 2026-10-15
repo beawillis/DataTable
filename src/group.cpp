@@ -1,5 +1,7 @@
 #include "datatable/group.hpp"
 
+#include "datatable/table.hpp"
+
 #include <algorithm>
 #include <utility>
 
@@ -49,6 +51,12 @@ GroupedColumn groupBy(const Column& column)
     }
 
     return groups;
+}
+
+GroupedColumn groupBy(const DataTable& table, std::size_t column_index)
+{
+    // DataTable::column validates the requested index.
+    return groupBy(table.column(column_index));
 }
 
 } // namespace datatable
