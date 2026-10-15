@@ -13,8 +13,8 @@ through one shared public API.
 
 ### 2.1 Table/data-model integration
 
-Updated [`include/datatable/table.hpp`](../include/datatable/table.hpp) and
-[`src/table.cpp`](../src/table.cpp) to make `DataTable` own:
+Updated [`include/datatable/table.hpp`](../../include/datatable/table.hpp) and
+[`src/table.cpp`](../../src/table.cpp) to make `DataTable` own:
 
 - the column schema;
 - typed `Column` objects;
@@ -36,7 +36,7 @@ The table now supports:
 
 ### 2.2 Tests
 
-Extended [`tests/test_table.cpp`](../tests/test_table.cpp) to verify:
+Extended [`tests/test_table.cpp`](../../tests/test_table.cpp) to verify:
 
 - rows can be inserted into a defined schema;
 - row counts and column values remain synchronized;
@@ -160,44 +160,3 @@ DataTable tests: passed
    and export owners before changing shared interfaces further.
 3. Add table-level integration tests for those modules.
 
-## 7. Primah - typed data model
-
-### 7.1 Week 2 objective
-
-Provide the typed value, row, and column structures used by `DataTable` and
-the other library modules, with clear ownership and checked access behavior.
-
-### 7.2 Implementation
-
-- **[`Cell`](../include/datatable/cell.hpp)** stores null, boolean, signed
-  integer, unsigned integer, floating point, or string values in a `CellValue`
-  variant. It provides typed inspection and access through `holds<T>()`,
-  `get<T>()`, and `getIf<T>()`, plus readable conversion through `toString()`.
-- **[`Row`](../include/datatable/row.hpp)** owns an ordered sequence of `Cell`
-  values. It supports initialization, size and empty queries, checked indexed
-  access, appending, and clearing.
-- **[`Column`](../include/datatable/column.hpp)** owns a validated name and an
-  ordered sequence of `Cell` values. It supports the same sequence operations
-  as `Row` and rejects empty names.
-- Values and collections are owned by value; invalid typed access and invalid
-  indices are reported rather than silently accepted.
-
-### 7.3 Tests
-
-Focused tests in [`test_cell.cpp`](../tests/test_cell.cpp),
-[`test_row.cpp`](../tests/test_row.cpp), and
-[`test_column.cpp`](../tests/test_column.cpp) cover supported cell types and
-formatting, invalid typed access, row and column construction and mutation,
-bounds errors, and empty column-name rejection. The tests are registered as
-`DataTable.cell`, `DataTable.row`, and `DataTable.column`.
-
-### 7.4 Validation
-
-```text
-CMake configuration: successful with MinGW Makefiles
-Build and tests: blocked; the available MinGW GCC 6.3 standard library does
-not provide <variant>, which is required by this C++17 data model.
-```
-
-The typed data-model implementation is present in the current branch; no
-additional public-interface changes were needed for this report update.
