@@ -8,9 +8,15 @@
 
 namespace datatable {
 
+class DataTable;
+
 // Render one column as a readable table without changing its values.
 std::string formatColumn(const Column& column,
                          const Style& style = Style{});
+
+// Render the complete table without changing its rows, columns, or cells.
+std::string formatTable(const DataTable& table,
+                        const Style& style = Style{});
 
 } // namespace datatable
 
