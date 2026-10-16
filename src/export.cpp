@@ -17,16 +17,6 @@ void ensure_writable(const std::ostream& output)
 	}
 }
 
-void ensure_schema_only(const DataTable& table)
-{
-	// Week 1 exports can safely write column names, but not hidden row data.
-	if (table.rowCount() != 0) {
-		throw std::logic_error(
-			"DataTable row values are not exposed to the export module yet."
-		);
-	}
-}
-
 std::string csv_field(const std::string& value)
 {
 	// CSV fields containing separators or line breaks must be quoted.
@@ -67,16 +57,25 @@ void write_html_escaped(const std::string& value, std::ostream& output)
 void write_csv(const DataTable& table, std::ostream& output)
 {
 	ensure_writable(output);
-	ensure_schema_only(table);
 
 	const auto& names = table.columnNames();
 	if (!names.empty()) {
-		// Emit one escaped header row; row data is not exposed yet.
+		// Emit the escaped header row before the table records.
 		for (std::size_t index = 0; index < names.size(); ++index) {
 			if (index != 0) {
 				output.put(',');
 			}
 			output << csv_field(names[index]);
+		}
+		output << "\r\n";
+	}
+
+	for (const Row& row : table.rows()) {
+		for (std::size_t index = 0; index < row.size(); ++index) {
+			if (index != 0) {
+				output.put(',');
+			}
+			output << csv_field(row[index].toString());
 		}
 		output << "\r\n";
 	}
@@ -87,7 +86,6 @@ void write_csv(const DataTable& table, std::ostream& output)
 void write_html(const DataTable& table, std::ostream& output)
 {
 	ensure_writable(output);
-	ensure_schema_only(table);
 
 	// Build a complete HTML document containing the current column headers.
 	output << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"

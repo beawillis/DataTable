@@ -7,10 +7,9 @@ namespace datatable {
 
 class DataTable;
 
-// Write the current schema as CSV or HTML to an existing output stream.
-// Row values will be added after DataTable exposes integrated row storage.
-// Until DataTable exposes row values, both functions reject nonempty tables
-// with std::logic_error. Stream failures raise std::ios_base::failure.
+// Write the table as CSV or HTML to an existing output stream.
+// CSV includes headers and all row values; stream failures raise
+// std::ios_base::failure. HTML currently exports the schema.
 void write_csv(const DataTable& table, std::ostream& output);
 void write_html(const DataTable& table, std::ostream& output);
 
