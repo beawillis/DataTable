@@ -4,9 +4,12 @@
 #include <stdexcept>
 
 #include "datatable/aggregate.hpp"
+#include "datatable/table.hpp"
 
 using datatable::Cell;
 using datatable::Column;
+using datatable::DataTable;
+using datatable::Row;
 using datatable::count;
 using datatable::max;
 using datatable::mean;
@@ -39,6 +42,41 @@ int main()
         invalidInputRejected = true;
     }
     assert(invalidInputRejected);
+
+    const DataTable table = DataTable::fromCsv(
+        "Name,Score\n"
+        "Ada,4\n"
+        "Grace,\n"
+        "Lin,2.5\n"
+        "Noah,8\n"
+    );
+
+    // Table overloads select a column and reuse the same null-aware logic.
+    assert(count(table, 1) == 3);
+    assert(std::abs(sum(table, 1) - 14.5) < 0.000001);
+    assert(std::abs(mean(table, 1) - (14.5 / 3.0)) < 0.000001);
+    assert(min(table, 1).get<std::int64_t>() == 2);
+    assert(max(table, 1).get<std::int64_t>() == 8);
+
+    bool invalidColumnRejected = false;
+    try {
+        (void)sum(table, 99);
+    }
+    catch (const std::out_of_range&) {
+        invalidColumnRejected = true;
+    }
+    assert(invalidColumnRejected);
+
+    DataTable empty;
+    empty.addColumn("Score");
+    bool emptyMeanRejected = false;
+    try {
+        (void)mean(empty, 0);
+    }
+    catch (const std::invalid_argument&) {
+        emptyMeanRejected = true;
+    }
+    assert(emptyMeanRejected);
 
     std::cout << "Aggregate tests passed.\n";
 }
