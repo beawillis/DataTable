@@ -1,5 +1,7 @@
 #include "datatable/aggregate.hpp"
 
+#include "datatable/table.hpp"
+
 #include <stdexcept>
 #include <type_traits>
 #include <variant>
@@ -132,6 +134,31 @@ Cell max(const Column& column)
     }
 
     return *result;
+}
+
+std::size_t count(const DataTable& table, std::size_t column_index)
+{
+    return count(table.column(column_index));
+}
+
+double sum(const DataTable& table, std::size_t column_index)
+{
+    return sum(table.column(column_index));
+}
+
+double mean(const DataTable& table, std::size_t column_index)
+{
+    return mean(table.column(column_index));
+}
+
+Cell min(const DataTable& table, std::size_t column_index)
+{
+    return min(table.column(column_index));
+}
+
+Cell max(const DataTable& table, std::size_t column_index)
+{
+    return max(table.column(column_index));
 }
 
 } // namespace datatable
