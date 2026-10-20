@@ -1,210 +1,434 @@
-# DataTable — High-Performance Data Table Formatting and Presentation Library
+# DataTable
 
-> A reusable C++ library for creating, manipulating, analyzing, formatting, and exporting tabular data.
+DataTable is a modular C++17 library for storing, inspecting, transforming,
+formatting, and exporting small tabular data sets. The project uses one shared
+`DataTable` representation across all modules so that rows, columns, and typed
+cells remain consistent.
 
-## Table of Contents
+## Table of contents
 
-1. [Project Overview](#project-overview)
-2. [Problem Statement](#problem-statement)
-3. [Objectives](#objectives)
-4. [Features](#features)
-5. [Technology Stack](#technology-stack)
-6. [Project Architecture](#project-architecture)
-7. [Requirements](#requirements)
-8. [Installation and Build](#installation-and-build)
-9. [Usage](#usage)
-10. [Testing](#testing)
-11. [Performance and Design Considerations](#performance-and-design-considerations)
-12. [Limitations](#limitations)
-13. [Contributing](#contributing)
-14. [Team Members](#team-members)
-15. [AI Use Declaration](#ai-use-declaration)
-16. [License](#license)
+1. [Project status](#project-status)
+2. [Implemented features](#implemented-features)
+3. [Architecture](#architecture)
+4. [Supported values](#supported-values)
+5. [Requirements](#requirements)
+6. [Build and test](#build-and-test)
+7. [Usage](#usage)
+8. [API overview](#api-overview)
+9. [Validation and error handling](#validation-and-error-handling)
+10. [Design and memory behavior](#design-and-memory-behavior)
+11. [Examples](#examples)
+12. [Reports](#reports)
+13. [Limitations](#limitations)
+14. [Team ownership](#team-ownership)
+15. [Contributing](#contributing)
+16. [AI use declaration](#ai-use-declaration)
+17. [License](#license)
 
----
+## Project status
 
-## 1. Project Overview
+The core library, module tests, and CMake build are implemented. The current
+test suite contains 12 registered test programs covering the data model, CSV
+I/O, table operations, formatting, styling, and export.
 
-**Team task:** Write a concise description explaining what DataTable is, the problem it addresses, its intended users, and why a reusable C++ library is appropriate.
+The project is developed as a group assignment. Each contributor owns a
+module, while `DataTable` is the shared integration boundary.
 
-## 2. Problem Statement
+## Implemented features
 
-Describe the difficulties of managing, organizing, analyzing, formatting, and exporting tabular data when reusable functionality is unavailable or fragmented.
+- Typed cells containing null, boolean, signed integer, unsigned integer,
+  double, or string values.
+- `Row` and `Column` data-model classes with ownership and bounds validation.
+- Central `DataTable` storage for schema, rows, and columns.
+- Row insertion, table clearing, column lookup, and synchronized row
+  replacement.
+- CSV parsing into string records.
+- CSV loading into a typed `DataTable`.
+- Missing CSV fields represented as null cells.
+- Validation of malformed CSV quoting and inconsistent row widths.
+- Stable ascending and descending sorting by column.
+- Filtering columns or complete tables using predicates or equality.
+- Grouping by column while preserving first-seen key order.
+- Counting, sum, mean, minimum, and maximum aggregation.
+- Console formatting with headers, borders, alignment, padding, and
+  automatically calculated widths.
+- CSV export of headers and row values with CSV escaping.
+- HTML schema export.
+- CMake installation and package target generation.
+- Focused module tests and full CTest validation.
 
-Explain how DataTable aims to address these challenges through a modular C++ API.
+## Architecture
 
-## 3. Objectives
+The library is organized around a shared table model:
 
-- Develop a reusable C++ library for tabular data management.
-- Implement a suitable data model with typed columns.
-- Support common data manipulation and analysis operations.
-- Provide consistent table formatting and presentation.
-- Support CSV input and CSV/HTML output.
-- Apply modular software design and appropriate data structures.
-- Use automated tests to verify correctness and edge cases.
-- Provide build instructions, examples, and documentation.
-- Use Git and GitHub for collaborative development and code review.
+```text
+DataTable
+├── Row
+│   └── Cell
+└── Column
+    └── Cell
+```
 
-## 4. Features
+`DataTable` owns the table schema, rows, and columns. `Row` owns an ordered
+sequence of `Cell` objects, and `Column` owns a name and an ordered sequence
+of `Cell` objects. Table operations use these objects instead of creating
+separate table representations.
 
-Update this list as each feature is implemented and tested.
+```text
+CSV parser ──> DataTable::fromCsv()
+                     │
+       ┌─────────────┼─────────────┐
+       ▼             ▼             ▼
+   sorting       filtering      grouping
+       │             │             │
+       └─────────────┼─────────────┘
+                     ▼
+               aggregation
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+      formatting              export
+```
 
-- [ ] Table creation and column management
-- [ ] Strongly typed columns: integer, double, string, and boolean
-- [ ] Row insertion, removal, and updating
-- [ ] CSV file loading
-- [ ] Sorting in ascending and descending order
-- [ ] Data filtering
-- [ ] Grouping and aggregation
-- [ ] Table formatting and styling
-- [ ] Headers and footers
-- [ ] CSV export
-- [ ] HTML export
-- [ ] Input validation and error handling
-- [ ] Automated unit and integration tests
-- [ ] Compilable examples
-- [ ] CMake-based build and installation
-
-## 5. Technology Stack
-
-Document the versions and tools actually used by the team.
-
-- **Language:** C++
-- **Build system:** CMake
-- **Compiler:** GCC, Clang, or MSVC, depending on the platform
-- **Version control:** Git
-- **Repository hosting:** GitHub
-- **Testing:** The test framework or testing mechanism adopted by the team
-- **Continuous integration:** GitHub Actions, if configured
-
-## 6. Project Architecture
-
-Explain the purpose of each directory and how the modules interact.
+### Repository layout
 
 ```text
 DataTable/
-├── README.md
 ├── CMakeLists.txt
 ├── LICENSE
-├── .gitignore
-├── include/
-│   └── datatable/
+├── README.md
+├── cmake/
+│   └── DataTableConfig.cmake.in
+├── include/datatable/
+│   ├── aggregate.hpp
+│   ├── cell.hpp
+│   ├── column.hpp
+│   ├── csv.hpp
+│   ├── export.hpp
+│   ├── filter.hpp
+│   ├── formatter.hpp
+│   ├── group.hpp
+│   ├── row.hpp
+│   ├── sort.hpp
+│   ├── style.hpp
+│   └── table.hpp
 ├── src/
+│   └── *.cpp
 ├── tests/
+│   ├── CMakeLists.txt
+│   └── test_*.cpp
 ├── examples/
+│   ├── CMakeLists.txt
+│   ├── basic_table.cpp
+│   └── reserved example files
 ├── reports/
-│   ├── week-01.md
-│   ├── week-02.md
-│   ├── week-03.md
-│   ├── week-04.md
-│   └── final-report.md
-├── data/
-│   ├── input/
-│   └── output/
-└── .github/
-    └── workflows/
-        └── build.yml
+│   ├── README.md
+│   ├── week-01/
+│   ├── week-02/
+│   ├── week-03/
+│   ├── week-04/
+│   └── final/
+└── .github/workflows/
+    └── build.yml
 ```
 
-Keep this tree synchronized with the repository. Remove entries for files or directories that do not exist.
+The `build/` directory is generated locally by CMake and is not part of the
+source layout.
 
-## 7. Requirements
+## Supported values
 
-List the supported operating systems, a compatible C++ compiler, the required C++ language standard, CMake version, and any additional dependencies.
+`CellValue` is defined as:
 
-## 8. Installation and Build
-
-### Clone the repository
-
-```bash
-git clone <repository-url>
-cd DataTable
+```cpp
+std::variant<
+    std::monostate,  // null
+    bool,
+    std::int64_t,
+    std::uint64_t,
+    double,
+    std::string
+>
 ```
 
-### Configure
+Empty CSV fields become null cells. CSV type inference recognizes exact
+`true` and `false`, signed and unsigned integer values that fit the supported
+ranges, and decimal values representable as `double`. Fields with leading or
+trailing whitespace remain strings rather than being silently trimmed.
+
+## Requirements
+
+- C++17-compatible compiler.
+- CMake 3.20 or newer.
+- Git for source retrieval.
+- A supported build toolchain, such as MSVC, GCC, or Clang.
+
+The project has no third-party runtime dependency. Tests use the C++ standard
+library and `assert`; they do not require an external test framework.
+
+## Build and test
+
+From the repository root:
 
 ```bash
 cmake -S . -B build
-```
-
-### Build
-
-```bash
 cmake --build build
-```
-
-### Run the tests
-
-```bash
 ctest --test-dir build --output-on-failure
 ```
 
-### Installation
+For a Release build on a multi-configuration generator:
 
-After configuring an install target in CMake, document the verified installation command for each supported platform.
+```bash
+cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
+```
 
-**Important:** Test every command on a clean checkout before documenting it as supported.
+The verified project validation is 12/12 tests passing.
 
-## 9. Usage
+To include examples, leave the default CMake option enabled:
 
-Explain how another C++ project can include the public headers, link against the DataTable library, create a table, manipulate data, and export results.
+```bash
+cmake -S . -B build -DDATATABLE_BUILD_EXAMPLES=ON
+cmake --build build
+```
 
-Insert a short, working C++ example after the public API has stabilized. Do not document functions that have not been implemented.
+To build without tests or examples:
 
-## 10. Testing
+```bash
+cmake -S . -B build \
+  -DDATATABLE_BUILD_TESTS=OFF \
+  -DDATATABLE_BUILD_EXAMPLES=OFF
+```
 
-Document:
+## Usage
 
-- Unit tests for individual modules.
-- Integration tests for interactions between modules.
-- Normal, boundary, empty-input, and invalid-input cases.
-- CSV parsing and export tests.
-- Sorting, filtering, grouping, and aggregation tests.
-- Build and test commands.
-- The actual test results and any known failures.
+The following example uses the implemented public API:
 
-## 11. Performance and Design Considerations
+```cpp
+#include <iostream>
+#include <cstdint>
+#include <sstream>
 
-Describe the data structures and algorithms selected by the team, the reasons for those decisions, and how unnecessary copying, repeated parsing, and avoidable allocations are minimized.
+#include "datatable/export.hpp"
+#include "datatable/formatter.hpp"
+#include "datatable/filter.hpp"
+#include "datatable/sort.hpp"
+#include "datatable/table.hpp"
 
-Include measured performance results only when benchmarks have actually been performed.
+int main()
+{
+    std::istringstream input(
+        "Name,Department,Score\n"
+        "Ada,Engineering,98.5\n"
+        "Grace,Support,91.0\n"
+        "Lin,Engineering,96.0\n"
+    );
 
-## 12. Limitations
+    datatable::DataTable table = datatable::DataTable::fromCsv(input);
 
-List the project's current limitations honestly. Possible areas to discuss include supported data types, CSV parsing constraints, missing-value handling, memory usage, and unsupported file formats.
+    datatable::DataTable engineering =
+        datatable::filterEquals(table, 1, datatable::Cell("Engineering"));
+    datatable::sortByColumn(engineering, 2);
 
-Do not describe planned features as completed functionality.
+    std::cout << datatable::formatTable(engineering);
+    datatable::write_csv(engineering, std::cout);
+}
+```
 
-## 13. Contributing
+`sortByColumn()` changes the row order of the supplied table. Filtering
+returns a new table and leaves its source unchanged. Formatting and export
+read the table without changing it.
 
-Explain the group's development workflow:
+## API overview
 
-1. Work on the assigned feature branch.
-2. Synchronize with `develop` when needed.
-3. Implement changes and run relevant tests.
-4. Commit using clear, descriptive messages.
-5. Push the feature branch to GitHub.
-6. Open a pull request targeting `develop`.
-7. Address review feedback and obtain approval before merging.
-8. Keep `main` stable and submission-ready.
+### Table and data model
 
-## 14. Team Members
+```cpp
+datatable::DataTable table;
+table.addColumn("Name");
+table.addColumn("Age");
+table.addRow(datatable::Row{"Ada", 36});
 
-| No. | Name | Registration Number |
-|---:|---|---|
-| 1 | Mukhaye Primah | 25/U/0840 |
-| 2 | Manige Daniel | 25/U/08745/PS |
-| 3 | Nantale Swabrah | 25/U/08772/PS |
-| 4 | Alele Brian Jesse | 25/U/26714 |
-| 5 | Tushabe Paul | 25/U/30756 |
-| 6 | Bifandhuba Elisha Alvin | 25/U/08704/PS |
-| 7 | Waran Newton Mono Korsuk | 25/X/08621/PS |
-| 8 | Mwanje Hamuza Tendo | 25/U/05654/PS |
+table.rowCount();
+table.columnCount();
+table.column("Name");
+table.rows();
+table.columns();
+```
 
-## 15. AI Use Declaration
+### CSV
 
-Document AI tools used during development, their purposes, the relevant team members' use, and how any suggestions were verified. Follow the project's academic instructions and ensure this declaration accurately reflects the team's work.
+```cpp
+datatable::CsvData records = datatable::parseCsv(input);
+datatable::DataTable table = datatable::DataTable::fromCsv(input);
+```
 
-## 16. License
+`parseCsv()` returns string records only. `DataTable::fromCsv()` performs
+typed-cell conversion and validates the table schema.
 
-Specify the project's chosen license and link to the `LICENSE` file. Do not claim a license has been selected until the team agrees on one.
+### Sorting and filtering
+
+```cpp
+datatable::sortByColumn(
+    table,
+    1,
+    datatable::SortOrder::descending
+);
+
+datatable::DataTable selected =
+    datatable::filterByColumn(table, 1, [](const datatable::Cell& cell) {
+        return cell.holds<std::int64_t>() && cell.get<std::int64_t>() >= 30;
+    });
+```
+
+### Grouping and aggregation
+
+```cpp
+const auto groups = datatable::groupBy(table, 1);
+const std::size_t rows_with_values = datatable::count(table, 2);
+const double total = datatable::sum(table, 2);
+const double average = datatable::mean(table, 2);
+```
+
+Numeric aggregation ignores null cells and rejects unsupported non-null
+values.
+
+### Formatting and export
+
+```cpp
+datatable::Style style;
+style.setAlignment(datatable::Alignment::right);
+std::cout << datatable::formatTable(table, style);
+
+datatable::write_csv(table, output);
+datatable::write_html(table, output);
+```
+
+CSV export includes headers and all rows. HTML export currently exports the
+table schema rather than complete row data.
+
+## Validation and error handling
+
+The library reports invalid input explicitly:
+
+- Invalid row widths raise `std::invalid_argument`.
+- Empty or duplicate column names raise `std::invalid_argument`.
+- Invalid row or column indexes raise `std::out_of_range`.
+- Incorrect typed `Cell` access raises `std::bad_variant_access`.
+- Null C-string values are rejected.
+- Malformed CSV quoting raises `std::invalid_argument`.
+- CSV records with the wrong number of fields raise `std::invalid_argument`.
+- Non-EOF CSV read failures raise `std::ios_base::failure`.
+- Failed export streams raise `std::ios_base::failure`.
+- Aggregation of unsupported non-null values raises
+  `std::invalid_argument`.
+
+## Design and memory behavior
+
+The library uses value-owning standard containers and RAII:
+
+- `Cell` owns its `CellValue`.
+- `Row` owns `std::vector<Cell>`.
+- `Column` owns its name and `std::vector<Cell>`.
+- `DataTable` owns its schema, rows, and columns.
+
+Move operations are explicitly available for the data-model classes. Public
+read-only access returns references where appropriate to avoid unnecessary
+copies. Operations that produce a new result, such as filtering, make an
+independent table by design. Sorting reorders complete rows and rebuilds the
+column view so values from one record remain together.
+
+The current implementation has not been accompanied by a formal benchmark;
+performance claims beyond these ownership and algorithmic choices should not
+be inferred.
+
+## Examples
+
+`examples/basic_table.cpp` is currently registered and built by CMake. The
+other example filenames are reserved for the corresponding demonstrations
+and are not currently populated with complete programs.
+
+The available test programs provide additional working usage examples for:
+
+- table construction;
+- CSV loading;
+- sorting and filtering;
+- grouping and aggregation;
+- formatting and styling; and
+- CSV and HTML export.
+
+## Reports
+
+Individual contributor reports are organized by week in [reports/README.md](reports/README.md):
+
+- [Week 1](reports/week-01/)
+- [Week 2](reports/week-02/)
+- [Week 3](reports/week-03/)
+- [Week 4](reports/week-04/)
+- [Final reports](reports/final/)
+
+The Week 3 report folder also contains the class-layout image used for the
+object-oriented design documentation.
+
+## Limitations
+
+- The supported cell types are limited to null, boolean, signed integer,
+  unsigned integer, double, and string.
+- CSV loading currently accepts text input streams and strings; there is no
+  dedicated file-path convenience function.
+- CSV type inference is intentionally conservative and does not trim fields.
+- Sorting and equality behavior is defined for the supported cell types; no
+  custom comparator API is currently exposed.
+- Grouping returns keys and counts, but does not produce grouped subtables.
+- Aggregation is not yet integrated into grouped result objects.
+- HTML export currently exports the schema only.
+- The formatter supports basic alignment, borders, headers, padding, and
+  automatic widths; advanced themes and footers are not implemented.
+- The project does not currently provide a benchmark suite.
+- The reserved example files still need complete demonstrations.
+
+## Team ownership
+
+| Contributor | Responsibility |
+|---|---|
+| Mukhaye Primah | `Cell`, `Column`, `Row`, and data-model validation |
+| Manige Daniel | CSV parsing and CSV input handling |
+| Nantale Swabrah | Sorting and filtering |
+| Alele Brian Jesse | Grouping |
+| Mwanje Hamuza Tendo | Aggregation |
+| Tushabe Paul | Formatting and styling |
+| Bifandhuba Elisha Alvin | Central `DataTable` and module integration |
+| Waran Newton Mono Korsuk | Export and demonstrations |
+
+Shared interfaces such as `table.hpp`, `cell.hpp`, `column.hpp`, and `row.hpp`
+should be changed in coordination with their owners and the table integrator.
+
+## Contributing
+
+1. Work only on the assigned module unless the team agrees otherwise.
+2. Coordinate changes to shared interfaces before implementing dependent work.
+3. Use a feature branch and keep it synchronized with `develop` when needed.
+4. Build the complete project before and after implementation.
+5. Run the focused tests and the full CTest suite.
+6. Use clear commits and push the feature branch.
+7. Open a pull request targeting `develop`.
+8. Address review feedback before merging.
+9. Keep `main` stable and submission-ready.
+
+## AI use declaration
+
+AI tools may be used as development assistants for code exploration,
+documentation drafting, implementation suggestions, test generation, and
+debugging. Team members remain responsible for reviewing, understanding, and
+verifying all generated suggestions. Build results, tests, and code review
+must be used to confirm changes before submission.
+
+The final academic declaration should be completed by the team according to
+the institution's requirements and should accurately identify the tools and
+contributions involved.
+
+## License
+
+The repository currently contains a `LICENSE` file. The project README does
+not assign a different license or make additional licensing claims. Confirm
+the team's chosen license and update this section if the licensing terms
+change.
