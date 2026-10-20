@@ -1,6 +1,7 @@
 #ifndef DATATABLE_FILTER_HPP
 #define DATATABLE_FILTER_HPP
 
+#include <cstddef>
 #include <functional>
 
 #include "datatable/column.hpp"

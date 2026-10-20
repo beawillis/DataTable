@@ -1,4 +1,5 @@
 #include <cassert>
+#include <functional>
 #include <iostream>
 #include <stdexcept>
 
@@ -23,6 +24,14 @@ int main()
     assert(selected[1].get<std::string>() == "Ada");
     assert(source.size() == 3);
 
+    // Null cells can be selected explicitly without changing the source.
+    const Column with_missing{"Values", {Cell(nullptr), Cell(4), Cell(nullptr)}};
+    const Column missing = filterEquals(with_missing, Cell(nullptr));
+    assert(missing.size() == 2);
+    assert(missing[0].isNull());
+    assert(missing[1].isNull());
+    assert(with_missing.size() == 3);
+
     // A predicate can express a custom filtering rule.
     const Column longNames = filterColumn(
         source,
@@ -45,6 +54,33 @@ int main()
     assert(engineering.column("Name")[0].get<std::string>() == "Ada");
     assert(engineering.column("Name")[1].get<std::string>() == "Lin");
     assert(table.rowCount() == 3);
+    assert(engineering.columnCount() == table.columnCount());
+    assert(engineering.column("Department")[0].get<std::string>() ==
+           "Engineering");
+
+    // An empty predicate is rejected explicitly instead of failing during
+    // iteration with an unclear callable error.
+    bool empty_predicate_threw = false;
+    try {
+        (void)filterColumn(source, std::function<bool(const Cell&)>{});
+    }
+    catch (const std::invalid_argument&) {
+        empty_predicate_threw = true;
+    }
+    assert(empty_predicate_threw);
+
+    bool empty_table_predicate_threw = false;
+    try {
+        (void)datatable::filterByColumn(
+            table,
+            0,
+            std::function<bool(const Cell&)>{}
+        );
+    }
+    catch (const std::invalid_argument&) {
+        empty_table_predicate_threw = true;
+    }
+    assert(empty_table_predicate_threw);
 
     bool invalid_index_threw = false;
     try {
