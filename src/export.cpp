@@ -39,7 +39,7 @@ std::string csv_field(const std::string& value)
 
 void write_html_escaped(const std::string& value, std::ostream& output)
 {
-	// Escape markup-sensitive characters so column names remain safe HTML text.
+	// Escape markup-sensitive characters so exported text cannot become markup.
 	for (const char character : value) {
 		switch (character) {
 		case '&': output << "&amp;"; break;
@@ -96,8 +96,20 @@ void write_html(const DataTable& table, std::ostream& output)
 		write_html_escaped(name, output);
 		output << "</th>";
 	}
-	output << "</tr>\n</thead>\n<tbody>\n</tbody>\n</table>\n"
-			  "</body>\n</html>\n";
+	output << "</tr>\n</thead>\n<tbody>\n";
+
+	// Export each complete row so HTML preserves the same records as CSV.
+	for (const Row& row : table.rows()) {
+		output << "<tr>";
+		for (const Cell& cell : row.cells()) {
+			output << "<td>";
+			write_html_escaped(cell.toString(), output);
+			output << "</td>";
+		}
+		output << "</tr>\n";
+	}
+
+	output << "</tbody>\n</table>\n</body>\n</html>\n";
 
 	ensure_writable(output);
 }
