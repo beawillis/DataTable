@@ -3,12 +3,16 @@
 #include <cassert>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 using datatable::Cell;
 using datatable::Column;
 
 int main()
 {
+    static_assert(std::is_nothrow_move_constructible<Column>::value);
+
     // A column keeps its name and supports empty and populated states.
     Column empty("Name");
     assert(empty.name() == "Name");
@@ -50,4 +54,9 @@ int main()
     // Clearing removes cells without invalidating the column.
     names.clear();
     assert(names.empty());
+
+    // Moving transfers owned storage without requiring cell copies.
+    Column moved = std::move(names);
+    assert(moved.name() == "Name");
+    assert(moved.empty());
 }

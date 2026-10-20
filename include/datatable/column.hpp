@@ -19,6 +19,11 @@ public:
     Column(std::string name, std::vector<Cell> cells);
     Column(std::string name, std::initializer_list<Cell> cells);
 
+    Column(const Column&) = default;
+    Column(Column&&) noexcept = default;
+    Column& operator=(const Column&) = default;
+    Column& operator=(Column&&) noexcept = default;
+
     // Inspect the column name, cell count, and contents without copying.
     const std::string& name() const noexcept;
     std::size_t size() const noexcept;

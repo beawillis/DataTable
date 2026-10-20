@@ -3,12 +3,16 @@
 #include <cassert>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 using datatable::Cell;
 using datatable::Row;
 
 int main()
 {
+    static_assert(std::is_nothrow_move_constructible<Row>::value);
+
     // Rows can be empty or initialized directly with mixed cell types.
     Row empty;
     assert(empty.size() == 0);
@@ -41,4 +45,8 @@ int main()
 
     row.clear();
     assert(row.empty());
+
+    // Row owns its vector and supports efficient move transfer.
+    Row moved = std::move(row);
+    assert(moved.empty());
 }
