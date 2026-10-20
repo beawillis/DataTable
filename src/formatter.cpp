@@ -3,7 +3,9 @@
 #include "datatable/table.hpp"
 
 #include <algorithm>
+#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 namespace datatable {
 namespace {
@@ -62,6 +64,20 @@ std::string formatCells(const std::vector<std::string>& values,
     return output.str();
 }
 
+std::string displayValue(const Cell& cell, const Style& style)
+{
+    // Only doubles need formatter-controlled precision; other cell types
+    // retain their normal textual representation.
+    if (!style.hasDecimalPrecision() || !cell.holds<double>()) {
+        return cell.toString();
+    }
+
+    std::ostringstream output;
+    output << std::fixed << std::setprecision(style.decimalPrecision())
+           << cell.get<double>();
+    return output.str();
+}
+
 } // namespace
 
 std::string formatColumn(const Column& column, const Style& style)
@@ -74,7 +90,7 @@ std::string formatColumn(const Column& column, const Style& style)
         values.push_back(column.name());
     }
     for (const Cell& cell : column.cells()) {
-        values.push_back(cell.toString());
+        values.push_back(displayValue(cell, style));
     }
 
     return formatCells(values, style);
@@ -85,12 +101,31 @@ std::string formatTable(const DataTable& table, const Style& style)
     if (table.columnCount() == 0) {
         return {};
     }
+    // A footer is rendered as one complete table row, so its width must
+    // match the table schema before any output is produced.
+    if (!style.footer().empty() &&
+        style.footer().size() != table.columnCount()) {
+        throw std::invalid_argument(
+            "Footer width must match the number of table columns."
+        );
+    }
 
     std::vector<std::size_t> widths(table.columnCount(), 0);
     for (std::size_t index = 0; index < table.columnCount(); ++index) {
         widths[index] = table.column(index).name().size();
+        // Include formatted values so decimal precision affects alignment.
         for (const Row& row : table.rows()) {
-            widths[index] = std::max(widths[index], row[index].toString().size());
+            widths[index] = std::max(
+                widths[index],
+                displayValue(row[index], style).size()
+            );
+        }
+        if (!style.footer().empty()) {
+            // Footer labels can be wider than headers or data values.
+            widths[index] = std::max(
+                widths[index],
+                style.footer()[index].size()
+            );
         }
     }
 
@@ -129,9 +164,13 @@ std::string formatTable(const DataTable& table, const Style& style)
         std::vector<std::string> values;
         values.reserve(row.size());
         for (const Cell& cell : row.cells()) {
-            values.push_back(cell.toString());
+            values.push_back(displayValue(cell, style));
         }
         writeRow(values);
+    }
+    if (!style.footer().empty()) {
+        // Render the footer separately; it is never stored as a data row.
+        writeRow(style.footer());
     }
     if (style.showBorders()) {
         writeBorder();
