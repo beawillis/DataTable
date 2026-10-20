@@ -59,10 +59,11 @@ void test_csv_exports_rows_and_cell_values()
 
 void test_html_document_and_escaping()
 {
-	// HTML-sensitive header characters must be escaped as text, not markup.
-	datatable::DataTable table;
-	table.addColumn("<Name & \"title\" 'label'>");
-	table.addColumn("plain");
+	// Headers and cell values must be escaped as text, not markup.
+	const datatable::DataTable table = datatable::DataTable::fromCsv(
+		"\"<Name & \"\"title\"\" 'label'>\",plain\n"
+		"\"<Ada & Grace>\",\"ready > now\"\n"
+	);
 
 	std::ostringstream output;
 	datatable::write_html(table, output);
@@ -72,7 +73,7 @@ void test_html_document_and_escaping()
 	assert(html.find("<!DOCTYPE html>") == 0);
 	assert(html.find("<th>&lt;Name &amp; &quot;title&quot; &#39;label&#39;&gt;</th>") != std::string::npos);
 	assert(html.find("<th>plain</th>") != std::string::npos);
-	assert(html.find("<tbody>\n</tbody>") != std::string::npos);
+	assert(html.find("<tbody>\n<tr><td>&lt;Ada &amp; Grace&gt;</td><td>ready &gt; now</td></tr>\n</tbody>") != std::string::npos);
 	assert(html.find("<script") == std::string::npos);
 }
 
@@ -89,6 +90,7 @@ void test_tables_without_columns()
 	datatable::write_html(table, html);
 	assert(html.str().find("<table>") != std::string::npos);
 	assert(html.str().find("<thead>\n<tr></tr>") != std::string::npos);
+	assert(html.str().find("<tbody>\n</tbody>") != std::string::npos);
 }
 
 void test_failed_output_stream_is_reported()
