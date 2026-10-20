@@ -2,13 +2,17 @@
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 using datatable::Cell;
 
 int main()
 {
+    static_assert(std::is_nothrow_move_constructible<Cell>::value);
+
     // Default and explicit null values share the same representation.
     const Cell missing;
     assert(missing.isNull());
@@ -64,4 +68,23 @@ int main()
         null_string_threw = true;
     }
     assert(null_string_threw);
+
+    // Preserve the largest standard unsigned integer exactly.
+    const Cell largest_integer(
+        std::numeric_limits<unsigned long long>::max()
+    );
+    assert(largest_integer.holds<std::uint64_t>());
+
+    // A long double beyond double's range must not silently become infinity.
+    bool oversized_float_threw = false;
+    try {
+        const long double oversized =
+            static_cast<long double>(std::numeric_limits<double>::max()) * 2;
+        const Cell invalid(oversized);
+        (void)invalid;
+    }
+    catch (const std::out_of_range&) {
+        oversized_float_threw = true;
+    }
+    assert(oversized_float_threw);
 }

@@ -18,6 +18,11 @@ public:
     Row(std::vector<Cell> cells);
     Row(std::initializer_list<Cell> cells);
 
+    Row(const Row&) = default;
+    Row(Row&&) noexcept = default;
+    Row& operator=(const Row&) = default;
+    Row& operator=(Row&&) noexcept = default;
+
     // Inspect the number of cells and read the complete sequence without copying.
     std::size_t size() const noexcept;
     bool empty() const noexcept;

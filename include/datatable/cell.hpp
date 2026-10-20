@@ -3,6 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -29,6 +31,11 @@ public:
     Cell(std::string value);
     Cell(const char* value);
 
+    Cell(const Cell&) = default;
+    Cell(Cell&&) noexcept = default;
+    Cell& operator=(const Cell&) = default;
+    Cell& operator=(Cell&&) noexcept = default;
+
     // Store integers without losing signedness and floating-point values as double.
     template <
         typename Numeric,
@@ -37,18 +44,41 @@ public:
             !std::is_same<typename std::decay<Numeric>::type, bool>::value
         >
     >
-    Cell(Numeric value) noexcept
+    Cell(Numeric value)
     {
         if constexpr (std::is_integral<Numeric>::value) {
             if constexpr (std::is_signed<Numeric>::value) {
+                if constexpr (sizeof(Numeric) > sizeof(std::int64_t)) {
+                    if (value > static_cast<Numeric>(
+                            std::numeric_limits<std::int64_t>::max())) {
+                        throw std::out_of_range(
+                            "Signed integer does not fit in Cell."
+                        );
+                    }
+                }
                 value_ = static_cast<std::int64_t>(value);
             }
             else {
+                if constexpr (sizeof(Numeric) > sizeof(std::uint64_t)) {
+                    if (value > static_cast<Numeric>(
+                            std::numeric_limits<std::uint64_t>::max())) {
+                        throw std::out_of_range(
+                            "Unsigned integer does not fit in Cell."
+                        );
+                    }
+                }
                 value_ = static_cast<std::uint64_t>(value);
             }
         }
         else {
-            value_ = static_cast<double>(value);
+            const double converted = static_cast<double>(value);
+            if (converted > std::numeric_limits<double>::max() ||
+                converted < -std::numeric_limits<double>::max()) {
+                throw std::out_of_range(
+                    "Floating-point value does not fit in Cell."
+                );
+            }
+            value_ = converted;
         }
     }
 
