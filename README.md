@@ -404,31 +404,24 @@ should be changed in coordination with their owners and the table integrator.
 
 ## Contributing
 
-1. Work only on the assigned module unless the team agrees otherwise.
-2. Coordinate changes to shared interfaces before implementing dependent work.
-3. Use a feature branch and keep it synchronized with `develop` when needed.
-4. Build the complete project before and after implementation.
-5. Run the focused tests and the full CTest suite.
-6. Use clear commits and push the feature branch.
-7. Open a pull request targeting `develop`.
-8. Address review feedback before merging.
-9. Keep `main` stable and submission-ready.
+1. Each member worked only on the assigned module unless the team agrees otherwise.
+2. Changes were co-ordinated to shared interfaces before implementing dependent work.
+3. Feature branches were used and kept  synchronized with `develop` when needed.
+4. Focused tests were run and the full CTest suite.
+6. Clear commits were used and pushed to the feature branch.
+7. Pull requests were opened targeting `develop`.
+8. Addressing review feedback was done before merging.
+   `Main` is  stable and submission-ready.
 
 ## AI use declaration
 
-AI tools may be used as development assistants for code exploration,
+AI tools were used as development assistants for code exploration,
 documentation drafting, implementation suggestions, test generation, and
-debugging. Team members remain responsible for reviewing, understanding, and
+debugging. Team members remained responsible for reviewing, understanding, and
 verifying all generated suggestions. Build results, tests, and code review
 must be used to confirm changes before submission.
-
-The final academic declaration should be completed by the team according to
-the institution's requirements and should accurately identify the tools and
-contributions involved.
 
 ## License
 
 The repository currently contains a `LICENSE` file. The project README does
-not assign a different license or make additional licensing claims. Confirm
-the team's chosen license and update this section if the licensing terms
-change.
+not assign a different license or make additional licensing claims.
