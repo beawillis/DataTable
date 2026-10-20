@@ -11,6 +11,10 @@ namespace datatable {
 Column filterColumn(const Column& column,
                     const std::function<bool(const Cell&)>& predicate)
 {
+    if (!predicate) {
+        throw std::invalid_argument("Filter predicate cannot be empty.");
+    }
+
     std::vector<Cell> filtered;
 
     // Preserve the original order while keeping accepted cells only.
@@ -39,6 +43,10 @@ DataTable filterByColumn(
         const std::function<bool(const Cell&)>& predicate
 )
 {
+        if (!predicate) {
+                throw std::invalid_argument("Filter predicate cannot be empty.");
+        }
+
         // Validate the column before constructing the filtered result.
         (void)table.column(column_index);
 

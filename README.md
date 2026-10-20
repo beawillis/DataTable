@@ -419,7 +419,7 @@ AI tools were used as development assistants for code exploration,
 documentation drafting, implementation suggestions, test generation, and
 debugging. Team members remained responsible for reviewing, understanding, and
 verifying all generated suggestions. Build results, tests, and code review
-must be used to confirm changes before submission.
+were used to confirm changes before submission.
 
 ## License
 
