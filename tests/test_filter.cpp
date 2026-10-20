@@ -1,12 +1,16 @@
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 #include "datatable/filter.hpp"
+#include "datatable/table.hpp"
 
 using datatable::Cell;
 using datatable::Column;
+using datatable::DataTable;
 using datatable::filterColumn;
 using datatable::filterEquals;
+using datatable::Row;
 
 int main()
 {
@@ -27,6 +31,29 @@ int main()
         });
     assert(longNames.size() == 1);
     assert(longNames[0].get<std::string>() == "Grace");
+
+    const DataTable table = DataTable::fromCsv(
+        "Name,Department\n"
+        "Ada,Engineering\n"
+        "Grace,Support\n"
+        "Lin,Engineering\n"
+    );
+    const DataTable engineering = filterEquals(table, 1, Cell{"Engineering"});
+
+    // Filtering complete rows preserves values from every column.
+    assert(engineering.rowCount() == 2);
+    assert(engineering.column("Name")[0].get<std::string>() == "Ada");
+    assert(engineering.column("Name")[1].get<std::string>() == "Lin");
+    assert(table.rowCount() == 3);
+
+    bool invalid_index_threw = false;
+    try {
+        (void)filterEquals(table, 99, Cell{"Engineering"});
+    }
+    catch (const std::out_of_range&) {
+        invalid_index_threw = true;
+    }
+    assert(invalid_index_threw);
 
     std::cout << "Filter tests passed.\n";
 }
