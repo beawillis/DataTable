@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 #include "datatable/formatter.hpp"
@@ -51,6 +52,34 @@ int main()
     // Formatting options can produce a compact console representation.
     const std::string plainOutput = formatTable(table, noDecoration);
     assert(plainOutput == "|Ada  |10 \n|Grace|200\n");
+
+    Style detailed;
+    // Precision changes display text without changing stored cell values.
+    detailed.setDecimalPrecision(2);
+    // Footer content is presentation-only and follows the table schema.
+    detailed.setFooter({"Total", "300.50"});
+    const DataTable decimalTable = DataTable::fromCsv(
+        "Name,Score\n"
+        "Ada,10.5\n"
+        "Grace,20\n"
+    );
+    const std::string detailedOutput = formatTable(decimalTable, detailed);
+    assert(detailedOutput.find("10.50") != std::string::npos);
+    assert(detailedOutput.find("20.00") != std::string::npos);
+    assert(detailedOutput.find("Total") != std::string::npos);
+    assert(detailedOutput.find("300.50") != std::string::npos);
+
+    bool footer_width_threw = false;
+    try {
+        // A mismatched footer cannot be aligned with the table columns.
+        Style invalidFooter;
+        invalidFooter.setFooter({"Only one cell"});
+        (void)formatTable(decimalTable, invalidFooter);
+    }
+    catch (const std::invalid_argument&) {
+        footer_width_threw = true;
+    }
+    assert(footer_width_threw);
 
     DataTable empty;
     empty.addColumn("Name");
