@@ -140,6 +140,52 @@ void test_csv_to_table_stream_and_width_validation()
 	assert(exception_thrown);
 }
 
+void test_missing_values_and_malformed_table_rows()
+{
+	// Empty fields become null cells, including leading and trailing fields.
+	const DataTable table = DataTable::fromCsv(
+		"Name,Age,Note\n"
+		",,ready\n"
+		"Ada,,\n"
+	);
+	assert(table.rowCount() == 2);
+	assert(table.rows()[0][0].isNull());
+	assert(table.rows()[0][1].isNull());
+	assert(table.rows()[1][1].isNull());
+	assert(table.rows()[1][2].isNull());
+
+	// A record with too few or too many fields is rejected.
+	for (const std::string input : {
+			"Name,Age\nAda\n",
+			"Name,Age\nAda,36,extra\n"
+		}) {
+		bool exception_thrown = false;
+		try {
+			(void)DataTable::fromCsv(input);
+		}
+		catch (const std::invalid_argument&) {
+			exception_thrown = true;
+		}
+		assert(exception_thrown);
+	}
+}
+
+void test_csv_stream_errors_are_rejected()
+{
+	// A non-EOF stream failure represents an unreadable CSV source.
+	std::istringstream failed_input("Name,Age\nAda,36\n");
+	failed_input.setstate(std::ios::failbit);
+
+	bool exception_thrown = false;
+	try {
+		(void)parseCsv(failed_input);
+	}
+	catch (const std::ios_base::failure&) {
+		exception_thrown = true;
+	}
+	assert(exception_thrown);
+}
+
 int main()
 {
 	test_plain_records_and_empty_fields();
@@ -151,6 +197,8 @@ int main()
 	test_csv_to_table_quoted_values_and_header_only();
 	test_csv_to_table_numeric_boundaries_and_whitespace();
 	test_csv_to_table_stream_and_width_validation();
+	test_missing_values_and_malformed_table_rows();
+	test_csv_stream_errors_are_rejected();
 
 	std::cout << "All CSV tests passed.\n";
 	return 0;

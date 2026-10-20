@@ -139,7 +139,9 @@ CsvData parseCsv(std::istream& input)
 		}
 	}
 
-	if (input.bad()) {
+	// EOF is a normal termination condition; other stream failures indicate
+	// that the CSV source could not be read completely.
+	if (input.bad() || (input.fail() && !input.eof())) {
 		throw std::ios_base::failure("Failed while reading CSV input.");
 	}
 	if (in_quotes) {
