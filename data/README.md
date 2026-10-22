@@ -26,14 +26,27 @@
   # Format a readable preview in the console (20 rows by default).
   .\build\examples\Debug\dataset_example.exe format data\input\day.csv 10
 
+  # Format the first 10 rows and also export those rows as a styled HTML table.
+  .\build\examples\Debug\dataset_example.exe format data\input\day.csv 10 data\output\day-first-10.html
+  Start-Process .\data\output\day-first-10.html
+
   # Group and count records by season.
   .\build\examples\Debug\dataset_example.exe group data\input\hour.csv season
+
+  # Create a report-ready analysis: filter to 2012, group by season,
+  # calculate rental-count statistics, and sort by total rentals descending.
+  .\build\examples\Debug\dataset_example.exe summary data\input\day.csv reports\visuals\bike-sharing-season-summary.html
   ```
 
   Replace `day.csv` with `hour.csv` to use the larger hourly dataset. Column
   names are taken from the CSV header. Filter values must match the column's
   type (for example, `season 1` or `dteday 2011-01-01`). Use `Release` instead
   of `Debug` in the executable path if you build the Release configuration.
+  For `format`, provide the row count before the optional HTML path. The HTML
+  file contains the same first rows displayed by the terminal preview.
+  The summary maps season codes 1–4 to Spring, Summer, Fall and Winter, and
+  reports the day count plus total, average, minimum and maximum rentals for
+  each season in 2012.
 
 The tool normalizes integer-looking values to decimal notation in numeric
 columns that also contain decimal values. This compatibility step happens in

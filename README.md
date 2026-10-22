@@ -382,7 +382,8 @@ tests when tests and examples are enabled:
 - `integration_example`
 - `performance_example`
 - `dataset_example` (loads a caller-supplied CSV for sort, filter, format,
-  group, and CSV/HTML export; see [data/README.md](data/README.md))
+  group, and CSV/HTML export, including an aggregated seasonal summary; see
+  [data/README.md](data/README.md))
 
 
 ## Reports
@@ -396,6 +397,14 @@ Individual contributor reports are organized by week in [reports/README.md](repo
 - [Final reports](reports/final/)
 - [General project report](reports/General-Report.md)
 - [Final presentation outline](reports/Final-Presentation.md)
+- [Report visuals](reports/visuals/)
+
+The report visuals include formatted Bike Sharing table previews and a
+seasonal summary sorted by total rentals:
+
+| Formatted table preview | Continued table preview | Sorted seasonal summary |
+|---|---|---|
+| ![Formatted Bike Sharing table](reports/visuals/formatted.png) | ![Continued formatted Bike Sharing table](reports/visuals/formatted-preview.png) | ![Bike Sharing seasonal summary sorted by total rentals](reports/visuals/sorted-season.png) |
 
 The Week 3 report folder also contains the class-layout image used for the
 object-oriented design documentation.
@@ -451,5 +460,4 @@ were used to confirm changes before submission.
 
 ## License
 
-The repository currently contains a `LICENSE` file. The project README does
-not assign a different license or make additional licensing claims.
+The repository currently contains a `LICENSE` file.
