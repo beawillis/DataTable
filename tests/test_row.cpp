@@ -49,4 +49,23 @@ int main()
     // Row owns its vector and supports efficient move transfer.
     Row moved = std::move(row);
     assert(moved.empty());
+
+    // A large row remains valid while cells are appended and indexed.
+    Row large;
+    for (std::size_t index = 0; index < 10000; ++index) {
+        large.append(static_cast<std::int64_t>(index));
+    }
+    assert(large.size() == 10000);
+    assert(large.at(9999).get<std::int64_t>() == 9999);
+
+    // A wrong requested type is rejected without changing the row.
+    bool wrong_type_threw = false;
+    try {
+        (void)large.at(0).get<std::string>();
+    }
+    catch (const std::bad_variant_access&) {
+        wrong_type_threw = true;
+    }
+    assert(wrong_type_threw);
+    assert(large.size() == 10000);
 }

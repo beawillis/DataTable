@@ -59,4 +59,17 @@ int main()
     Column moved = std::move(names);
     assert(moved.name() == "Name");
     assert(moved.empty());
+
+    // A large column keeps its name and all appended values.
+    Column large("Values");
+    for (std::size_t index = 0; index < 10000; ++index) {
+        large.append(static_cast<std::int64_t>(index));
+    }
+    assert(large.size() == 10000);
+    assert(large.at(9999).get<std::int64_t>() == 9999);
+
+    // The empty column remains a valid object after its cells are cleared.
+    large.clear();
+    assert(large.empty());
+    assert(large.name() == "Values");
 }
