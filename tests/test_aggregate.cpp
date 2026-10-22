@@ -34,14 +34,39 @@ int main()
     assert(min(scores).get<std::int64_t>() == 2);
     assert(max(scores).get<std::int64_t>() == 8);
 
-    bool invalidInputRejected = false;
-    try {
-        (void)sum(Column{"Names", {Cell{"Ada"}}});
+    // Boolean and unsigned cells are numeric alternatives too.
+    const Column mixed_numeric{
+        "Mixed",
+        {Cell{true}, Cell{static_cast<std::uint64_t>(6)}, Cell{2.0}}
+    };
+    assert(std::abs(sum(mixed_numeric) - 9.0) < 0.000001);
+    assert(std::abs(mean(mixed_numeric) - 3.0) < 0.000001);
+    assert(min(mixed_numeric).get<bool>());
+    assert(max(mixed_numeric).get<std::uint64_t>() == 6);
+
+    // Non-numeric non-null cells are invalid for every numeric summary.
+    for (const auto operation : {0, 1, 2, 3}) {
+        bool invalidInputRejected = false;
+        try {
+            const Column names{"Names", {Cell{"Ada"}}};
+            if (operation == 0) {
+                (void)sum(names);
+            }
+            else if (operation == 1) {
+                (void)mean(names);
+            }
+            else if (operation == 2) {
+                (void)min(names);
+            }
+            else {
+                (void)max(names);
+            }
+        }
+        catch (const std::invalid_argument&) {
+            invalidInputRejected = true;
+        }
+        assert(invalidInputRejected);
     }
-    catch (const std::invalid_argument&) {
-        invalidInputRejected = true;
-    }
-    assert(invalidInputRejected);
 
     const DataTable table = DataTable::fromCsv(
         "Name,Score\n"
@@ -67,6 +92,7 @@ int main()
     }
     assert(invalidColumnRejected);
 
+    // Null-only input has no meaningful mean, minimum, or maximum.
     DataTable empty;
     empty.addColumn("Score");
     bool emptyMeanRejected = false;
@@ -77,6 +103,45 @@ int main()
         emptyMeanRejected = true;
     }
     assert(emptyMeanRejected);
+
+    for (const auto operation : {0, 1}) {
+        bool emptyRejected = false;
+        try {
+            if (operation == 0) {
+                (void)min(empty, 0);
+            }
+            else {
+                (void)max(empty, 0);
+            }
+        }
+        catch (const std::invalid_argument&) {
+            emptyRejected = true;
+        }
+        assert(emptyRejected);
+    }
+
+    // Every table overload must reject an invalid column index.
+    for (const auto operation : {0, 1, 2, 3}) {
+        bool invalidIndexRejected = false;
+        try {
+            if (operation == 0) {
+                (void)count(table, 99);
+            }
+            else if (operation == 1) {
+                (void)mean(table, 99);
+            }
+            else if (operation == 2) {
+                (void)min(table, 99);
+            }
+            else {
+                (void)max(table, 99);
+            }
+        }
+        catch (const std::out_of_range&) {
+            invalidIndexRejected = true;
+        }
+        assert(invalidIndexRejected);
+    }
 
     std::cout << "Aggregate tests passed.\n";
 }
