@@ -186,6 +186,27 @@ void test_csv_stream_errors_are_rejected()
 	assert(exception_thrown);
 }
 
+void test_large_csv_input()
+{
+	// Generate a repeatable large input without depending on an external file.
+	std::ostringstream input;
+	input << "Id,Department,Score\n";
+	for (std::size_t index = 0; index < 10000; ++index) {
+		input << index << ','
+			  << (index % 2 == 0 ? "Engineering" : "Support") << ','
+			  << (index % 1000) / 10.0 << '\n';
+	}
+
+	const DataTable table = DataTable::fromCsv(input.str());
+	assert(table.columnCount() == 3);
+	assert(table.rowCount() == 10000);
+	assert(table.column("Id")[0].get<std::int64_t>() == 0);
+	assert(table.column("Id")[9999].get<std::int64_t>() == 9999);
+	assert(table.column("Department")[9998].get<std::string>() ==
+		   "Engineering");
+	assert(table.column("Score")[9999].get<double>() == 99.9);
+}
+
 int main()
 {
 	test_plain_records_and_empty_fields();
@@ -199,6 +220,7 @@ int main()
 	test_csv_to_table_stream_and_width_validation();
 	test_missing_values_and_malformed_table_rows();
 	test_csv_stream_errors_are_rejected();
+	test_large_csv_input();
 
 	std::cout << "All CSV tests passed.\n";
 	return 0;
