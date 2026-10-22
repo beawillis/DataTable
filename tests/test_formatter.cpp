@@ -1,7 +1,10 @@
 #include <cassert>
+#include <cstdint>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "datatable/formatter.hpp"
 #include "datatable/table.hpp"
@@ -10,6 +13,7 @@ using datatable::Alignment;
 using datatable::Cell;
 using datatable::Column;
 using datatable::DataTable;
+using datatable::Row;
 using datatable::Style;
 using datatable::formatColumn;
 using datatable::formatTable;
@@ -85,6 +89,49 @@ int main()
     empty.addColumn("Name");
     // A schema-only table still produces a visible formatted result.
     assert(!formatTable(empty).empty());
+
+    DataTable mixed;
+    mixed.addColumn("ID");
+    mixed.addColumn("Description with a deliberately long column name");
+    mixed.addColumn("Value");
+    mixed.addRow(Row{
+        Cell{std::numeric_limits<std::int64_t>::max()},
+        Cell{"short"},
+        Cell{true}
+    });
+    mixed.addRow(Row{
+        Cell{static_cast<std::uint64_t>(9007199254740991ULL)},
+        Cell{"a much longer description value"},
+        Cell{nullptr}
+    });
+
+    const auto beforeRows = mixed.rows();
+    Style mixedStyle;
+    mixedStyle.setDecimalPrecision(2);
+    const std::string mixedOutput = formatTable(mixed, mixedStyle);
+    // Width calculation must accommodate both short and long names/values.
+    assert(mixedOutput.find("Description with a deliberately long column name")
+           != std::string::npos);
+    assert(mixedOutput.find("9223372036854775807") != std::string::npos);
+    assert(mixedOutput.find("a much longer description value")
+           != std::string::npos);
+    // Formatting is presentation-only and must preserve rows and cell types.
+    assert(mixed.rows().size() == beforeRows.size());
+    for (std::size_t row = 0; row < beforeRows.size(); ++row) {
+        assert(mixed.rows()[row].size() == beforeRows[row].size());
+        for (std::size_t cell = 0; cell < beforeRows[row].size(); ++cell) {
+            assert(mixed.rows()[row][cell].value()
+                   == beforeRows[row][cell].value());
+        }
+    }
+    const std::vector<std::string> expectedNames{
+        "ID", "Description with a deliberately long column name", "Value"
+    };
+    assert(mixed.columnNames() == expectedNames);
+
+    const DataTable noSchema;
+    // A completely empty table has no columns to render.
+    assert(formatTable(noSchema).empty());
 
     std::cout << "Formatter tests passed.\n";
 }
