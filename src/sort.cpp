@@ -68,7 +68,8 @@ bool cellLess(const Cell& left, const Cell& right)
 
 Column sortColumn(const Column& column, SortOrder order)
 {
-    // Copy first so sorting never changes the caller's column.
+    // Copy first so sorting never changes the caller's column. stable_sort
+    // keeps equal-key values in their original order.
     std::vector<Cell> sorted = column.cells();
 
     std::stable_sort(
@@ -89,6 +90,7 @@ void sortByColumn(DataTable& table, std::size_t column_index, SortOrder order)
     // column() validates the requested index before any table changes occur.
     (void)table.column(column_index);
 
+    // Sort complete rows so values from other columns stay with their record.
     std::vector<Row> sorted_rows = table.rows();
     std::stable_sort(
         sorted_rows.begin(),
