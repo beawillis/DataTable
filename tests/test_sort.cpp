@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <stdexcept>
 
@@ -28,6 +29,17 @@ int main()
     const Column descending = sortColumn(source, SortOrder::descending);
     assert(descending[0].get<std::int64_t>() == 3);
     assert(descending[2].get<std::int64_t>() == 1);
+
+    // Numeric values are compared by value rather than their text form.
+    const Column mixed_numbers{
+        "Numbers",
+        {Cell{10}, Cell{2.5}, Cell{100}, Cell{true}}
+    };
+    const Column numeric_order = sortColumn(mixed_numbers);
+    assert(numeric_order[0].get<bool>());
+    assert(numeric_order[1].get<double>() == 2.5);
+    assert(numeric_order[2].get<std::int64_t>() == 10);
+    assert(numeric_order[3].get<std::int64_t>() == 100);
 
     DataTable table;
     table.addColumn("Name");
@@ -63,6 +75,21 @@ int main()
     sortByColumn(empty, 0);
     assert(empty.empty());
 
+    // Sorting an empty standalone column returns an empty result with schema.
+    const Column empty_sorted = sortColumn(Column("Value"));
+    assert(empty_sorted.empty());
+    assert(empty_sorted.name() == "Value");
+
+    // Null values have a defined order and do not invalidate sorting.
+    const Column with_missing{
+        "Values",
+        {Cell{4}, Cell(nullptr), Cell{1}}
+    };
+    const Column missing_first = sortColumn(with_missing);
+    assert(missing_first[0].isNull());
+    assert(missing_first[1].get<std::int64_t>() == 1);
+    assert(missing_first[2].get<std::int64_t>() == 4);
+
     bool invalid_index_threw = false;
     try {
         sortByColumn(table, 99);
@@ -71,6 +98,16 @@ int main()
         invalid_index_threw = true;
     }
     assert(invalid_index_threw);
+
+    bool empty_table_index_threw = false;
+    try {
+        DataTable no_columns;
+        sortByColumn(no_columns, 0);
+    }
+    catch (const std::out_of_range&) {
+        empty_table_index_threw = true;
+    }
+    assert(empty_table_index_threw);
 
     std::cout << "Sort tests passed.\n";
 }
