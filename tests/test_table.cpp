@@ -1,7 +1,14 @@
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
+#include "datatable/aggregate.hpp"
+#include "datatable/export.hpp"
+#include "datatable/filter.hpp"
+#include "datatable/formatter.hpp"
+#include "datatable/group.hpp"
+#include "datatable/sort.hpp"
 #include "datatable/table.hpp"
 
 using datatable::DataTable;
@@ -145,6 +152,53 @@ void test_csv_width_validation()
     assert(exception_thrown);
 }
 
+void test_full_module_integration()
+{
+    // Load one shared table so every module works with the same schema and
+    // typed row data instead of creating incompatible table representations.
+    DataTable table = DataTable::fromCsv(
+        "Name,Department,Score\n"
+        "Ada,Engineering,98.5\n"
+        "Grace,Support,91.0\n"
+        "Lin,Engineering,96.0\n"
+    );
+
+    const DataTable engineering =
+        datatable::filterEquals(table, 1, datatable::Cell("Engineering"));
+    // Filtering returns a new table containing complete matching rows.
+    assert(engineering.rowCount() == 2);
+
+    DataTable ordered = engineering;
+    // Sort the working copy so the filtered result remains an independent
+    // source for checking non-mutating behavior.
+    datatable::sortByColumn(ordered, 2, datatable::SortOrder::descending);
+    assert(ordered.column("Name")[0].get<std::string>() == "Ada");
+    assert(ordered.column("Name")[1].get<std::string>() == "Lin");
+
+    const auto groups = datatable::groupBy(ordered, 1);
+    // Grouping and aggregation read the synchronized column view.
+    assert(groups.size() == 1);
+    assert(groups[0].count() == 2);
+    assert(datatable::count(ordered, 2) == 2);
+    assert(datatable::mean(ordered, 2) == 97.5);
+
+    const std::string formatted = datatable::formatTable(ordered);
+    // Formatting reads the table and returns presentation text only.
+    assert(formatted.find("Engineering") != std::string::npos);
+
+    std::ostringstream csv;
+    // Exporters write the same complete rows in their respective formats.
+    datatable::write_csv(ordered, csv);
+    assert(csv.str().find("Ada,Engineering,98.5") != std::string::npos);
+
+    std::ostringstream html;
+    datatable::write_html(ordered, html);
+    assert(html.str().find("<td>Ada</td>") != std::string::npos);
+
+    // Sorting changes only the working copy, not the filtered source.
+    assert(engineering.column("Name")[0].get<std::string>() == "Ada");
+}
+
 int main()
 {
     test_empty_table();
@@ -155,6 +209,7 @@ int main()
     test_invalid_schema_operations();
     test_csv_integration();
     test_csv_width_validation();
+    test_full_module_integration();
 
     std::cout << "All DataTable core tests passed.\n";
 
