@@ -5,8 +5,8 @@
 
 ## 1. Week 3 objective
 
-Integrate sorting, filtering, grouping, aggregation, formatting, and export
-around one shared `DataTable` representation. Each module must consume the
+Integrated sorting, filtering, grouping, aggregation, formatting, and export
+around one shared `DataTable` representation. Each module consumes the
 central rows and columns without creating an incompatible second table model.
 Elisha's responsibility was to integrate the existing module APIs through the
 central table, not to reimplement the internal logic of each module.
@@ -172,8 +172,8 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate future API changes across all module owners before modifying the
+1. Coordinating future API changes across all module owners before modifying the
    shared `DataTable` interface.
-2. Add combined example programs that demonstrate the complete Week 3 flow.
-3. Extend integration tests for chained operations such as filter-then-sort
+2. Adding combined example programs that demonstrate the complete Week 3 flow.
+3. Extending integration tests for chained operations such as filter-then-sort
    and group-then-aggregate.

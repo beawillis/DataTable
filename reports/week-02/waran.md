@@ -5,7 +5,7 @@
 
 ## 1. Week 2 objective
 
-Implement CSV export for the shared `DataTable` model so callers can write
+Implemented CSV export for the shared `DataTable` model so callers could write
 column headers and complete row data to an output stream without losing cell
 values or producing invalid CSV.
 
@@ -143,7 +143,7 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with the formatter owner when console and export output need a
+1. Coordinating with the formatter owner when console and export output need a
    shared presentation policy.
-2. Extend HTML export to include complete row data in a later assignment.
-3. Add file-based export examples after the public export API is finalized.
+2. Extending HTML export to include complete row data in a later assignment.
+3. Adding file-based export examples after the public export API is finalized.

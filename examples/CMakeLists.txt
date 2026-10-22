@@ -7,8 +7,8 @@ target_link_libraries(basic_table
         DataTable::DataTable
 )
 
-# Build examples that exercise the public API and the release smoke test.
-foreach(example IN ITEMS integration performance)
+# Build examples that exercise the public API and provide release smoke tests.
+foreach(example IN ITEMS csv filtering grouping export integration performance)
     add_executable(${example}_example
         ${example}_example.cpp
     )

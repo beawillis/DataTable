@@ -5,8 +5,8 @@
 
 ## 1. Week 4 objective
 
-Test CSV input with valid, empty, missing, malformed, and large data sources.
-The tests verify both standalone parsing and typed `DataTable::fromCsv()`
+Tested CSV input with valid, empty, missing, malformed, and large data sources.
+The tests verified both standalone parsing and typed `DataTable::fromCsv()`
 integration.
 
 ## 2. Test coverage completed
@@ -91,5 +91,5 @@ Full CTest suite: 12/12 tests passed
   loading API.
 - Delimiters and CSV dialect rules are not configurable.
 - The large-input test validates correctness but is not a formal benchmark.
-- Future conversion rules must remain synchronized with `CellValue` and the
-  other table modules.
+- Keeping future conversion rules synchronized with `CellValue` and the other
+  table modules.

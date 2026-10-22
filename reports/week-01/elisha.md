@@ -10,7 +10,7 @@
 
 ## 1. Week 1 objective
 
-Establish the initial project foundation and define a small, stable `DataTable`
+Established the initial project foundation and defined a small, stable `DataTable`
 core that the data-model, CSV, algorithm, grouping, formatting, and export
 modules can build on.
 
@@ -114,7 +114,6 @@ The following shared-interface decisions remain coordination points for Week 2:
 No shared interface should be changed silently. Any required change to
 `table.hpp`, `column.hpp`, `cell.hpp`, or `row.hpp` should be discussed with
 the relevant owner and Elisha first.
-
 
 
 

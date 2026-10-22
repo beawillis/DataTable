@@ -24,7 +24,7 @@
 
 #### Class structure and implementation
 
-Waran's Week 1 export module does not create a new export class. It uses the
+Week 1 export module does not create a new export class. It uses the
 existing public `DataTable` class and two stateless export functions.
 
 - **Class used:** `DataTable` is the input object. Its private

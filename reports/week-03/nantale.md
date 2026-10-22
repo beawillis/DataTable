@@ -5,9 +5,9 @@
 
 ## 1. Week 3 objective
 
-Implement reusable filtering for standalone columns and complete `DataTable`
-rows. Filtering must support predicates and equality checks, preserve row
-relationships, handle missing values, validate column selection, and leave
+Implemented reusable filtering for standalone columns and complete `DataTable`
+rows. Filtering supports predicates and equality checks, preserves row
+relationships, handles missing values, validates column selection, and leaves
 the source data unchanged.
 
 ## 2. Work completed
@@ -134,7 +134,7 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate future predicate or query-expression changes with the table-core
+1. Coordinating future predicate or query-expression changes with the table-core
    owner.
-2. Add agreed multi-column filtering only if it is required by the project.
-3. Keep filtering behavior aligned with future missing-value rules.
+2. Adding agreed multi-column filtering only if it is required by the project.
+3. Keeping filtering behavior aligned with future missing-value rules.

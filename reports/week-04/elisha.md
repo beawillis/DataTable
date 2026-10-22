@@ -5,9 +5,9 @@
 
 ## 1. Week 4 objective
 
-Complete the table-level integration, verify the project from a clean build,
-exercise the public API across modules, measure a representative processing
-pipeline, prepare the release installation, and document the final result.
+Completed the table-level integration, verified the project from a clean build,
+exercised the public API across modules, measured a representative processing
+pipeline, prepared the release installation, and documented the final result.
 
 ## 2. Work completed
 
@@ -131,7 +131,7 @@ architecture.
 
 ## 8. Next steps
 
-1. Run the CI workflow on the final submission branch.
-2. Record the CI result and the performance smoke-test output in the final
+1. Running the CI workflow on the final submission branch.
+2. Recording the CI result and the performance smoke-test output in the final
    presentation.
-3. Keep shared table-interface changes coordinated with all module owners.
+3. Keeping shared table-interface changes coordinated with all module owners.

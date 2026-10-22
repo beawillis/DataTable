@@ -5,10 +5,10 @@
 
 ## 1. Week 2 objective
 
-Implement basic console formatting for the shared `DataTable` model. The
-formatter must present headers and values clearly, calculate suitable column
-widths, support alignment and padding, draw optional borders, and leave the
-underlying data unchanged.
+Implemented basic console formatting for the shared `DataTable` model. The
+formatter presents headers and values clearly, calculates suitable column
+widths, supports alignment and padding, draws optional borders, and leaves
+the underlying data unchanged.
 
 ## 2. Paul's work completed
 
@@ -158,7 +158,7 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with the export owner when formatted output is reused by
+1. Coordinating with the export owner when formatted output is reused by
    console, CSV, or HTML demonstrations.
-2. Add any agreed numeric-specific alignment rules in a later iteration.
-3. Extend styling only after the core formatting API remains stable.
+2. Adding any agreed numeric-specific alignment rules in a later iteration.
+3. Extending styling only after the core formatting API remains stable.

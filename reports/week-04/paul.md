@@ -4,7 +4,7 @@
 
 ## 1. Week 4 objective
 
-Validate that formatting handles long and short names, large numeric values,
+Validated that formatting handles long and short names, large numeric values,
 empty tables, and mixed column types without changing the underlying data.
 
 ## 2. Tests completed
@@ -67,5 +67,5 @@ Full CTest suite: 12/12 tests passed
 - Output is currently a plain-text table representation.
 - Extremely large rendered strings require corresponding memory for the
   returned output.
-- Future styling features should continue to preserve the non-mutating
-  formatting contract.
+- Preserving the non-mutating formatting contract when adding future styling
+  features.
