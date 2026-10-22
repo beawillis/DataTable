@@ -5,7 +5,7 @@
 
 ## 1. Week 2 objective
 
-Provide the typed `Cell`, `Row`, and `Column` model classes used by the shared
+Provided the typed `Cell`, `Row`, and `Column` model classes used by the shared
 `DataTable` API, with clear ownership, checked access, and predictable value
 behavior.
 
@@ -150,8 +150,8 @@ Data-model tests: passed
 
 ## 7. Next steps
 
-1. Continue coordinating with table-core so any shared-interface changes remain
+1. Coordinating with table-core so any shared-interface changes remain
    synchronized.
-2. Add more table-level integration checks where model behavior affects
+2. Adding more table-level integration checks where model behavior affects
    sorting/filtering/grouping and formatting.
-3. Extend test coverage as new value-handling requirements are introduced.
+3. Extending test coverage as new value-handling requirements are introduced.

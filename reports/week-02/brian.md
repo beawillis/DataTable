@@ -5,7 +5,7 @@
 
 ## 1. Week 2 objective
 
-Implement grouping functionality that can identify distinct values in a
+Implemented grouping functionality that can identify distinct values in a
 selected table column, count how many rows belong to each group, and preserve
 the original table without changing its row or column data.
 
@@ -155,7 +155,7 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with the aggregation owner when grouped results are combined
+1. Coordinating with the aggregation owner when grouped results are combined
    with count, sum, mean, minimum, or maximum operations.
-2. Add any agreed mixed-type or null-grouping rules to the tests.
-3. Keep grouping table-level APIs aligned with future DataTable changes.
+2. Adding any agreed mixed-type or null-grouping rules to the tests.
+3. Keeping grouping table-level APIs aligned with future DataTable changes.

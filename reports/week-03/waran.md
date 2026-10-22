@@ -5,9 +5,9 @@
 
 ## 1. Week 3 objective
 
-Implement HTML export for the shared `DataTable`. The exporter must include
-the table schema and complete row data, escape HTML-sensitive text, preserve
-missing values, and report output-stream failures.
+Implemented HTML export for the shared `DataTable`. The exporter includes
+the table schema and complete row data, escapes HTML-sensitive text, preserves
+missing values, and reports output-stream failures.
 
 ## 2. Work completed
 
@@ -108,6 +108,6 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Add optional CSS or class-name configuration if required by the project.
-2. Complete the export demonstration example when the examples are expanded.
-3. Coordinate any future HTML template changes with the formatting owner.
+1. Adding optional CSS or class-name configuration if required by the project.
+2. Completing the export demonstration example when the examples are expanded.
+3. Coordinating any future HTML template changes with the formatting owner.

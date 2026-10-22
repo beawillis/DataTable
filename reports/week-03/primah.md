@@ -5,9 +5,9 @@
 
 ## 1. Week 3 objective
 
-Improve validation, type safety, and memory behavior in the `Cell`, `Row`,
-and `Column` data-model classes. The changes must protect the shared data
-model used by `DataTable` and the other modules without creating a second
+Improved validation, type safety, and memory behavior in the `Cell`, `Row`,
+and `Column` data-model classes. The changes protect the shared data model
+used by `DataTable` and the other modules without creating a second
 representation of table data.
 
 ## 2. Work completed
@@ -128,8 +128,8 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Keep future supported-type changes synchronized with CSV conversion,
+1. Keeping future supported-type changes synchronized with CSV conversion,
    sorting, aggregation, and export.
-2. Add agreed tests for any future decimal precision or non-finite-number
+2. Adding agreed tests for any future decimal precision or non-finite-number
    policy.
-3. Preserve the ownership and validation rules when extending the data model.
+3. Preserving the ownership and validation rules when extending the data model.

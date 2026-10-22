@@ -5,8 +5,8 @@
 
 ## 1. Week 2 objective
 
-Connect the central `DataTable` class to the typed `Row` and `Column` data
-model, integrate parsed CSV records, and provide basic table operations
+Connected the central `DataTable` class to the typed `Row` and `Column` data
+model, integrated parsed CSV records, and provided basic table operations
 through one shared public API.
 
 ## 2. Elisha's work completed
@@ -159,7 +159,7 @@ DataTable tests: passed
 
 ## 7. Next steps
 
-1. Update dependent modules to consume the integrated table rows and columns.
-2. Coordinate with CSV, sorting/filtering, grouping, aggregation, formatting,
+1. Updating dependent modules to consume the integrated table rows and columns.
+2. Coordinating with CSV, sorting/filtering, grouping, aggregation, formatting,
    and export owners before changing shared interfaces further.
-3. Add table-level integration tests for those modules.
+3. Adding table-level integration tests for those modules.

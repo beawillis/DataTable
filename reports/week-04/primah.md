@@ -5,10 +5,10 @@
 
 ## 1. Week 4 objective
 
-Test the data-model classes thoroughly using empty tables and containers,
+Tested the data-model classes thoroughly using empty tables and containers,
 empty rows, wrong types, invalid indexes, valid mixed data, and large
-collections. The tests must confirm that valid operations remain usable and
-invalid access is reported explicitly.
+collections. The tests confirmed that valid operations remained usable and
+invalid access was reported explicitly.
 
 ## 2. Tests completed
 
@@ -84,5 +84,5 @@ Full CTest suite: 12/12 tests passed
 - The data model supports the currently agreed `CellValue` alternatives only.
 - Large-data tests validate correctness and growth behavior, but are not a
   formal memory benchmark.
-- Future value types must be added consistently to conversion, comparison,
-  formatting, aggregation, and export code.
+- Adding future value types consistently to conversion, comparison, formatting,
+  aggregation, and export code.

@@ -5,8 +5,8 @@
 
 ## 1. Week 3 objective
 
-Implement reusable aggregation operations for the shared `DataTable` model.
-The module must calculate counts and numeric summaries without modifying the
+Implemented reusable aggregation operations for the shared `DataTable` model.
+The module calculates counts and numeric summaries without modifying the
 source table, while reporting invalid columns and unsupported values clearly.
 
 ## 2. Hamza's work completed
@@ -161,8 +161,8 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with Brian so grouped results can be combined with aggregation
+1. Coordinating with Brian so grouped results can be combined with aggregation
    when the project adds group-level summaries.
-2. Add agreed aggregation rules for null-only and mixed-type columns to the
+2. Adding agreed aggregation rules for null-only and mixed-type columns to the
    test suite.
-3. Keep table-level overloads aligned with future DataTable API changes.
+3. Keeping table-level overloads aligned with future DataTable API changes.
