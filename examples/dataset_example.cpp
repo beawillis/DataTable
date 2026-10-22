@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <cerrno>
 #include <cctype>
+#include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <optional>
@@ -245,8 +248,128 @@ void printUsage()
         << "  dataset_example sort <input.csv> <output.csv> [column]\n"
         << "  dataset_example filter <input.csv> <output.csv> <column> <value>\n"
         << "  dataset_example export <input.csv> <output.csv|output.html>\n"
-        << "  dataset_example format <input.csv> [rows-to-display]\n"
-        << "  dataset_example group <input.csv> <column>\n";
+        << "  dataset_example format <input.csv> [rows-to-display] [output.html]\n"
+        << "  dataset_example group <input.csv> <column>\n"
+        << "  dataset_example summary <day.csv> <output.html>\n";
+}
+
+std::string seasonLabel(const datatable::Cell& key)
+{
+    // Translate the dataset's numeric season codes into report-friendly names.
+    const std::string value = key.toString();
+    if (value == "1") {
+        return "Spring";
+    }
+    if (value == "2") {
+        return "Summer";
+    }
+    if (value == "3") {
+        return "Fall";
+    }
+    if (value == "4") {
+        return "Winter";
+    }
+    return "Season " + value;
+}
+
+double numericValue(const datatable::Cell& cell)
+{
+    // Convert supported numeric Cell alternatives for display-only formatting.
+    if (const std::int64_t* value = cell.getIf<std::int64_t>()) {
+        return static_cast<double>(*value);
+    }
+    if (const std::uint64_t* value = cell.getIf<std::uint64_t>()) {
+        return static_cast<double>(*value);
+    }
+    if (const double* value = cell.getIf<double>()) {
+        return *value;
+    }
+    throw std::invalid_argument("Expected a numeric aggregate value.");
+}
+
+std::string fixedNumber(double value, int precision)
+{
+    // Store a rounded display string so both HTML and terminal output agree.
+    std::ostringstream formatted;
+    formatted << std::fixed << std::setprecision(precision) << value;
+    return formatted.str();
+}
+
+datatable::DataTable seasonalSummary(const datatable::DataTable& source)
+{
+    // Resolve columns by header, then select the dataset's second year (2012).
+    const std::size_t yearIndex = columnIndex(source, "yr");
+    const std::size_t seasonIndex = columnIndex(source, "season");
+    const std::size_t rentalsIndex = columnIndex(source, "cnt");
+
+    const datatable::DataTable filtered =
+        datatable::filterEquals(source, yearIndex, datatable::Cell{1});
+
+    // Discover the season keys and their day counts from the filtered rows.
+    const datatable::GroupedColumn groups =
+        datatable::groupBy(filtered, seasonIndex);
+
+    // Keep aggregate values numeric until after sorting so totals sort by value.
+    datatable::DataTable numericSummary;
+    numericSummary.addColumn("Season", datatable::CellType::string);
+    numericSummary.addColumn("Days", datatable::CellType::unsigned_integer);
+    numericSummary.addColumn(
+        "Total rentals", datatable::CellType::floating_point
+    );
+    numericSummary.addColumn(
+        "Average rentals", datatable::CellType::floating_point
+    );
+    numericSummary.addColumn(
+        "Minimum rentals", datatable::CellType::floating_point
+    );
+    numericSummary.addColumn(
+        "Maximum rentals", datatable::CellType::floating_point
+    );
+
+    for (const datatable::Group& group : groups) {
+        // Select one season's rows to calculate its rental statistics.
+        const datatable::DataTable seasonRows =
+            datatable::filterEquals(filtered, seasonIndex, group.key());
+        if (datatable::count(seasonRows, rentalsIndex) == 0) {
+            throw std::invalid_argument(
+                "A season has no non-null rental counts to aggregate."
+            );
+        }
+
+        const double average =
+            std::round(datatable::mean(seasonRows, rentalsIndex) * 100.0) /
+            100.0;
+        // The group count is the number of days; aggregates summarize daily cnt.
+        numericSummary.addRow(datatable::Row{
+            seasonLabel(group.key()),
+            static_cast<std::uint64_t>(group.count()),
+            datatable::sum(seasonRows, rentalsIndex),
+            average,
+            numericValue(datatable::min(seasonRows, rentalsIndex)),
+            numericValue(datatable::max(seasonRows, rentalsIndex))
+        });
+    }
+
+    datatable::sortByColumn(
+        numericSummary, 2, datatable::SortOrder::descending
+    );
+
+    // Convert result cells to display strings after sorting to control decimals.
+    datatable::DataTable summary;
+    for (const std::string& name : numericSummary.columnNames()) {
+        summary.addColumn(name, datatable::CellType::string);
+    }
+    for (const datatable::Row& row : numericSummary.rows()) {
+        summary.addRow(datatable::Row{
+            row[0].toString(),
+            row[1].toString(),
+            fixedNumber(numericValue(row[2]), 0),
+            fixedNumber(numericValue(row[3]), 2),
+            fixedNumber(numericValue(row[4]), 0),
+            fixedNumber(numericValue(row[5]), 0)
+        });
+    }
+    return summary;
 }
 
 } // namespace
@@ -309,11 +432,11 @@ int main(int argc, char* argv[])
                       << path << '\n';
         }
         else if (operation == "format") {
-            if (argc != 3 && argc != 4) {
+            if (argc < 3 || argc > 5 || (argc == 5 && argv[4][0] == '\0')) {
                 printUsage();
                 return 2;
             }
-            const std::size_t requested = argc == 4
+            const std::size_t requested = argc >= 4
                 ? static_cast<std::size_t>(std::stoull(argv[3]))
                 : 20;
             const std::size_t limit = std::min(requested, table.rowCount());
@@ -335,6 +458,12 @@ int main(int argc, char* argv[])
             // Limit decimal display noise without changing stored values.
             style.setDecimalPrecision(3);
             std::cout << datatable::formatTable(preview, style);
+            if (argc == 5) {
+                // Export only the preview rows as a browser-ready HTML table.
+                saveTable(preview, argv[4], true);
+                std::cout << "Exported formatted preview with " << limit
+                          << " rows to " << argv[4] << '\n';
+            }
             if (limit < table.rowCount()) {
                 std::cout << "Displayed " << limit << " of "
                           << table.rowCount() << " rows.\n";
@@ -354,6 +483,25 @@ int main(int argc, char* argv[])
                 std::cout << "  " << group.key().toString()
                           << ": " << group.count() << " rows\n";
             }
+        }
+        else if (operation == "summary") {
+            if (argc != 4) {
+                printUsage();
+                return 2;
+            }
+            // Export the same analyzed table that is formatted for the console.
+            const datatable::DataTable summary = seasonalSummary(table);
+            saveTable(summary, argv[3], true);
+
+            datatable::Style style;
+            style.setAlignment(datatable::Alignment::center);
+            style.setDecimalPrecision(2);
+            std::cout << datatable::formatTable(summary, style);
+            std::cout << "Filtered to 2012, grouped by season, aggregated "
+                         "rental counts, and sorted by total rentals "
+                         "descending. Exported "
+                      << summary.rowCount() << " groups to " << argv[3]
+                      << '\n';
         }
         else {
             printUsage();

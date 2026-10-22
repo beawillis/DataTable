@@ -7,3 +7,8 @@
 - [Week 3](./week-03/)
 - [Week 4](./week-04/)
 - [Final report](./final/)
+- [Report visuals](./visuals/)
+
+The visuals folder contains three screenshots of formatted and analyzed
+Bike Sharing tables, plus the HTML seasonal summary used to generate the
+sorted seasonal view.

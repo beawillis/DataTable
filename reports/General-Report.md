@@ -68,9 +68,41 @@ this report.
   without changing the underlying table.
 - CSV export writes headers and complete rows with field escaping.
 - HTML export writes a complete HTML document, including headers and rows, and
-  escapes markup-sensitive characters.
+  escapes markup-sensitive characters. Exported HTML includes a simple
+  responsive table style for browser viewing and screenshots.
 - Seven executable examples demonstrate table creation, CSV, filtering,
   grouping, export, integration and a performance sample.
+
+### Bike Sharing dataset analysis
+
+The dataset example also creates a compact report table from `day.csv`. It
+filters the records to 2012 (`yr == 1`), groups the remaining rows by season,
+calculates the number of days and the total, average, minimum and maximum daily
+rentals (`cnt`) for each season, then sorts seasons by total rentals in
+descending order. The average is displayed to two decimal places.
+
+The generated browser-ready table is
+[bike-sharing-season-summary.html](./visuals/bike-sharing-season-summary.html).
+The supplied screenshots below are included in the report visuals folder.
+
+**Figure 1. Formatted Bike Sharing table (first view).**
+
+![Formatted Bike Sharing table, first view](./visuals/formatted.png)
+
+**Figure 2. Formatted Bike Sharing table (continued view).**
+
+![Formatted Bike Sharing table, continued view](./visuals/formatted-preview.png)
+
+**Figure 3. Seasonal rental summary, sorted by total rentals.**
+
+![Bike Sharing seasonal summary sorted by total rentals](./visuals/sorted-season.png)
+
+| Season | Days | Total rentals | Average rentals | Minimum rentals | Maximum rentals |
+|---|---:|---:|---:|---:|---:|
+| Fall | 94 | 641,479 | 6,824.24 | 4,073 | 8,714 |
+| Summer | 92 | 571,273 | 6,209.49 | 1,027 | 8,362 |
+| Winter | 89 | 515,476 | 5,791.87 | 22 | 8,555 |
+| Spring | 91 | 321,348 | 3,531.30 | 441 | 7,836 |
 
 ## Architecture
 
