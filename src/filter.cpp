@@ -24,6 +24,9 @@ Column filterColumn(const Column& column,
         }
     }
 
+    if (column.type()) {
+        return Column(column.name(), *column.type(), std::move(filtered));
+    }
     return Column(column.name(), std::move(filtered));
 }
 
@@ -52,7 +55,12 @@ DataTable filterByColumn(
 
         DataTable filtered;
         for (const Column& column : table.columns()) {
-            filtered.addColumn(column.name());
+            if (column.type()) {
+                filtered.addColumn(column.name(), *column.type());
+            }
+            else {
+                filtered.addColumn(column.name());
+            }
         }
 
         // Copy complete rows so values in other columns stay associated.

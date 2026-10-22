@@ -11,6 +11,17 @@
 
 namespace datatable {
 
+// The active value type stored by a Cell.
+enum class CellType
+{
+    null,
+    boolean,
+    signed_integer,
+    unsigned_integer,
+    floating_point,
+    string
+};
+
 // The supported value types; monostate represents a null cell.
 using CellValue = std::variant<
     std::monostate,
@@ -84,6 +95,7 @@ public:
 
     // Check for null and inspect the stored value or its type.
     bool isNull() const noexcept;
+    CellType type() const noexcept;
 
     const CellValue& value() const noexcept;
     CellValue& value() noexcept;

@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -33,13 +33,13 @@ int main()
     // Numeric values are compared by value rather than their text form.
     const Column mixed_numbers{
         "Numbers",
-        {Cell{10}, Cell{2.5}, Cell{100}, Cell{true}}
+        {Cell{10.0}, Cell{2.5}, Cell{100.0}, Cell{nullptr}}
     };
     const Column numeric_order = sortColumn(mixed_numbers);
-    assert(numeric_order[0].get<bool>());
+    assert(numeric_order[0].isNull());
     assert(numeric_order[1].get<double>() == 2.5);
-    assert(numeric_order[2].get<std::int64_t>() == 10);
-    assert(numeric_order[3].get<std::int64_t>() == 100);
+    assert(numeric_order[2].get<double>() == 10.0);
+    assert(numeric_order[3].get<double>() == 100.0);
 
     DataTable table;
     table.addColumn("Name");
@@ -79,6 +79,11 @@ int main()
     const Column empty_sorted = sortColumn(Column("Value"));
     assert(empty_sorted.empty());
     assert(empty_sorted.name() == "Value");
+
+    const Column typed_empty_sorted = sortColumn(
+        Column("Typed", datatable::CellType::signed_integer)
+    );
+    assert(typed_empty_sorted.type() == datatable::CellType::signed_integer);
 
     // Null values have a defined order and do not invalidate sorting.
     const Column with_missing{

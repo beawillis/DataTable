@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -20,7 +20,7 @@ int main()
 {
     const Column scores{
         "Scores",
-        {Cell{4}, Cell{nullptr}, Cell{2.5}, Cell{8}}
+        {Cell{4.0}, Cell{nullptr}, Cell{2.5}, Cell{8.0}}
     };
 
     // Count reports values while excluding null cells.
@@ -31,18 +31,19 @@ int main()
     assert(std::abs(mean(scores) - (14.5 / 3.0)) < 0.000001);
 
     // Minimum and maximum return the original numeric values.
-    assert(min(scores).get<std::int64_t>() == 2);
-    assert(max(scores).get<std::int64_t>() == 8);
+    assert(min(scores).get<double>() == 2.5);
+    assert(max(scores).get<double>() == 8.0);
 
-    // Boolean and unsigned cells are numeric alternatives too.
-    const Column mixed_numeric{
-        "Mixed",
-        {Cell{true}, Cell{static_cast<std::uint64_t>(6)}, Cell{2.0}}
+    // Numeric summaries also accept homogeneous boolean and unsigned columns.
+    const Column boolean_values{"Flags", {Cell{true}, Cell{false}}};
+    assert(sum(boolean_values) == 1.0);
+    const Column unsigned_values{
+        "Counts",
+        {Cell{static_cast<std::uint64_t>(2)},
+         Cell{static_cast<std::uint64_t>(6)}}
     };
-    assert(std::abs(sum(mixed_numeric) - 9.0) < 0.000001);
-    assert(std::abs(mean(mixed_numeric) - 3.0) < 0.000001);
-    assert(min(mixed_numeric).get<bool>());
-    assert(max(mixed_numeric).get<std::uint64_t>() == 6);
+    assert(sum(unsigned_values) == 8.0);
+    assert(mean(unsigned_values) == 4.0);
 
     // Non-numeric non-null cells are invalid for every numeric summary.
     for (const auto operation : {0, 1, 2, 3}) {
@@ -70,18 +71,18 @@ int main()
 
     const DataTable table = DataTable::fromCsv(
         "Name,Score\n"
-        "Ada,4\n"
+        "Ada,4.0\n"
         "Grace,\n"
         "Lin,2.5\n"
-        "Noah,8\n"
+        "Noah,8.0\n"
     );
 
     // Table overloads select a column and reuse the same null-aware logic.
     assert(count(table, 1) == 3);
     assert(std::abs(sum(table, 1) - 14.5) < 0.000001);
     assert(std::abs(mean(table, 1) - (14.5 / 3.0)) < 0.000001);
-    assert(min(table, 1).get<std::int64_t>() == 2);
-    assert(max(table, 1).get<std::int64_t>() == 8);
+    assert(min(table, 1).get<double>() == 2.5);
+    assert(max(table, 1).get<double>() == 8.0);
 
     bool invalidColumnRejected = false;
     try {

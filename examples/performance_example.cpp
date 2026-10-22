@@ -1,47 +1,119 @@
 #include <chrono>
-#include <cstdint>
+#include <cstddef>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 #include "datatable/aggregate.hpp"
+#include "datatable/export.hpp"
 #include "datatable/filter.hpp"
 #include "datatable/group.hpp"
 #include "datatable/sort.hpp"
 #include "datatable/table.hpp"
 
-int main()
-{
-    // Use a fixed input size so repeated smoke-test runs are comparable.
-    constexpr std::size_t row_count = 10000;
-    datatable::DataTable table;
-    table.addColumn("Id");
-    table.addColumn("Department");
-    table.addColumn("Score");
+namespace {
 
-    for (std::size_t index = 0; index < row_count; ++index) {
-        // Build realistic mixed-type rows with two repeatable departments.
-        table.addRow(datatable::Row{
-            static_cast<std::uint64_t>(index),
-            index % 2 == 0 ? "Engineering" : "Support",
-            static_cast<double>(index % 1000) / 10.0
-        });
+std::string makeCsv(std::size_t rowCount)
+{
+    std::string csv{"Id,Department,Score\n"};
+    csv.reserve(rowCount * 40);
+    for (std::size_t index = 0; index < rowCount; ++index) {
+        csv += std::to_string(index);
+        csv += index % 2 == 0 ? ",Engineering," : ",Support,";
+        // Keep one consistent floating-point type throughout the score column.
+        csv += std::to_string(static_cast<double>(index % 10000) / 10.0);
+        csv.push_back('\n');
+    }
+    return csv;
+}
+
+template <typename Operation>
+long long measureMicroseconds(Operation&& operation)
+{
+    const auto started = std::chrono::steady_clock::now();
+    operation();
+    const auto elapsed = std::chrono::steady_clock::now() - started;
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+        elapsed
+    ).count();
+}
+
+void runSample(std::size_t rowCount)
+{
+    // Generate input outside the loading timer so each measurement is scoped.
+    const std::string csv = makeCsv(rowCount);
+    datatable::DataTable table;
+    const long long loadTime = measureMicroseconds([&] {
+        table = datatable::DataTable::fromCsv(csv);
+    });
+
+    datatable::DataTable selected;
+    const long long filterTime = measureMicroseconds([&] {
+        selected = datatable::filterEquals(
+            table,
+            1,
+            datatable::Cell{"Engineering"}
+        );
+    });
+
+    // Keep the table copy outside the sort timer; sortByColumn includes its
+    // internal row-ordering and synchronized-column work.
+    datatable::DataTable sorted = selected;
+    const long long sortTime = measureMicroseconds([&] {
+        datatable::sortByColumn(sorted, 2);
+    });
+
+    datatable::GroupedColumn groups;
+    const long long groupTime = measureMicroseconds([&] {
+        groups = datatable::groupBy(table, 1);
+    });
+
+    double averageScore = 0.0;
+    const long long aggregateTime = measureMicroseconds([&] {
+        averageScore = datatable::mean(selected, 2);
+    });
+
+    std::ostringstream csvOutput;
+    const long long csvExportTime = measureMicroseconds([&] {
+        datatable::write_csv(selected, csvOutput);
+    });
+
+    std::ostringstream htmlOutput;
+    const long long htmlExportTime = measureMicroseconds([&] {
+        datatable::write_html(selected, htmlOutput);
+    });
+
+    if (table.rowCount() != rowCount ||
+        selected.rowCount() != rowCount / 2 ||
+        groups.size() != 2 ||
+        datatable::count(selected, 2) != selected.rowCount() ||
+        csvOutput.tellp() <= 0 ||
+        htmlOutput.tellp() <= 0) {
+        throw std::runtime_error("Performance example validation failed.");
     }
 
-    // Measure only the integrated filtering, sorting, grouping, and
-    // aggregation pipeline, not table construction.
-    const auto started = std::chrono::steady_clock::now();
-    datatable::DataTable selected =
-        datatable::filterEquals(table, 1, datatable::Cell("Engineering"));
-    datatable::sortByColumn(selected, 2);
-    const auto groups = datatable::groupBy(selected, 1);
-    const double average = datatable::mean(selected, 2);
-    const auto elapsed = std::chrono::steady_clock::now() - started;
-    const auto milliseconds =
-        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    std::cout << "Rows: " << rowCount
+              << ", selected: " << selected.rowCount()
+              << ", groups: " << groups.size()
+              << ", average score: " << averageScore << '\n'
+              << "  CSV load: " << loadTime << " us\n"
+              << "  Filter: " << filterTime << " us\n"
+              << "  Sort: " << sortTime << " us\n"
+              << "  Group: " << groupTime << " us\n"
+              << "  Mean: " << aggregateTime << " us\n"
+              << "  CSV export: " << csvExportTime << " us\n"
+              << "  HTML export: " << htmlExportTime << " us\n";
+}
 
-    std::cout << "Rows processed: " << row_count << '\n'
-              << "Rows selected: " << selected.rowCount() << '\n'
-              << "Groups: " << groups.size() << '\n'
-              << "Average score: " << average << '\n'
-              << "Pipeline time (ms): " << milliseconds << '\n';
+} // namespace
+
+int main()
+{
+    // Representative sizes make growth trends visible without claiming a
+    // cross-library benchmark or machine-independent performance result.
+    for (const std::size_t rowCount : {1000, 10000, 100000}) {
+        runSample(rowCount);
+    }
     return 0;
 }

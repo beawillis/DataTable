@@ -1,6 +1,6 @@
 #include "datatable/column.hpp"
 
-#include <cassert>
+#include "test_assert.hpp"
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -22,14 +22,61 @@ int main()
     Column names("Name", {"Ada", "Grace"});
     assert(names.size() == 2);
     assert(!names.empty());
+    assert(names.type() == datatable::CellType::string);
     assert(names.at(0).get<std::string>() == "Ada");
-    names[1] = Cell("Hopper");
+    names.set(1, Cell("Hopper"));
     assert(names.at(1).toString() == "Hopper");
 
-    names.append(42);
+    names.append("Margaret");
     assert(names.size() == 3);
-    assert(names.at(2).get<std::int64_t>() == 42);
+    assert(names.at(2).get<std::string>() == "Margaret");
     assert(names.cells().size() == 3);
+
+    bool mixed_type_rejected = false;
+    try {
+        names.append(42);
+    }
+    catch (const std::invalid_argument&) {
+        mixed_type_rejected = true;
+    }
+    assert(mixed_type_rejected);
+
+    bool mismatched_update_rejected = false;
+    try {
+        names.set(0, 42);
+    }
+    catch (const std::invalid_argument&) {
+        mismatched_update_rejected = true;
+    }
+    assert(mismatched_update_rejected);
+    assert(names[0].get<std::string>() == "Ada");
+
+    // A declared type remains available for an empty column.
+    Column typed_empty("Count", datatable::CellType::signed_integer);
+    assert(typed_empty.type() == datatable::CellType::signed_integer);
+    typed_empty.append(nullptr);
+    typed_empty.append(42);
+    assert(typed_empty.size() == 2);
+
+    bool null_type_rejected = false;
+    try {
+        const Column invalid_type("Invalid", datatable::CellType::null);
+        (void)invalid_type;
+    }
+    catch (const std::invalid_argument&) {
+        null_type_rejected = true;
+    }
+    assert(null_type_rejected);
+
+    bool mixed_constructor_rejected = false;
+    try {
+        const Column invalid_values("Mixed", {Cell{"text"}, Cell{42}});
+        (void)invalid_values;
+    }
+    catch (const std::invalid_argument&) {
+        mixed_constructor_rejected = true;
+    }
+    assert(mixed_constructor_rejected);
 
     // Reject invalid names and out-of-range cell access.
     bool empty_name_threw = false;
@@ -54,6 +101,7 @@ int main()
     // Clearing removes cells without invalidating the column.
     names.clear();
     assert(names.empty());
+    assert(names.type() == datatable::CellType::string);
 
     // Moving transfers owned storage without requiring cell copies.
     Column moved = std::move(names);
