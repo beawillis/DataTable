@@ -32,6 +32,7 @@ GroupedColumn groupBy(const Column& column)
 {
     GroupedColumn groups;
 
+    // The linear search preserves first-seen order while consolidating keys.
     for (const Cell& cell : column.cells()) {
         const auto match = std::find_if(
             groups.begin(),
