@@ -337,15 +337,20 @@ copies. Operations that produce a new result, such as filtering, make an
 independent table by design. Sorting reorders complete rows and rebuilds the
 column view so values from one record remain together.
 
-The current implementation has not been accompanied by a formal benchmark;
-performance claims beyond these ownership and algorithmic choices should not
-be inferred.
+The `performance_example` provides a repeatable 10,000-row integration smoke
+test and reports elapsed pipeline time. It is not a formal benchmark, and
+results depend on the build, platform, and machine load.
 
 ## Examples
 
-`examples/basic_table.cpp` is currently registered and built by CMake. The
-other example filenames are reserved for the corresponding demonstrations
-and are not currently populated with complete programs.
+The following examples are currently registered and built by CMake:
+
+- `basic_table_example`
+- `integration_example`
+- `performance_example`
+
+The remaining reserved example filenames are not currently populated with
+complete programs.
 
 The available test programs provide additional working usage examples for:
 
