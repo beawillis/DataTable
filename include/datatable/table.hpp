@@ -57,11 +57,19 @@ public:
      */
     const std::vector<std::string>& columnNames() const noexcept;
 
-    // Add a named column; adding columns after rows exist is rejected.
+    // Add an inferred-type column; the first non-null value establishes its type.
     void addColumn(const std::string& name);
+    // Declare a column type before adding rows; null cells are accepted.
+    void addColumn(const std::string& name, CellType type);
 
     // Add a row whose width matches the current number of columns.
     void addRow(const Row& row);
+
+    // Update or remove a row while keeping the column views synchronized.
+    // Invalid indexes raise std::out_of_range; mismatched row widths/types
+    // raise std::invalid_argument.
+    void updateRow(std::size_t index, const Row& row);
+    void removeRow(std::size_t index);
 
     // Replace the row order while keeping the column view synchronized.
     void replaceRows(const std::vector<Row>& rows);
@@ -69,10 +77,8 @@ public:
     const std::vector<Row>& rows() const noexcept;
     const std::vector<Column>& columns() const noexcept;
 
-    Column& column(std::size_t index);
     const Column& column(std::size_t index) const;
 
-    Column& column(const std::string& name);
     const Column& column(const std::string& name) const;
 
 private:

@@ -82,6 +82,9 @@ Column sortColumn(const Column& column, SortOrder order)
             return cellLess(right, left);
         });
 
+    if (column.type()) {
+        return Column(column.name(), *column.type(), std::move(sorted));
+    }
     return Column(column.name(), std::move(sorted));
 }
 

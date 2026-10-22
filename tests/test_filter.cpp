@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <functional>
 #include <iostream>
 #include <stdexcept>
@@ -57,6 +57,13 @@ int main()
     assert(engineering.columnCount() == table.columnCount());
     assert(engineering.column("Department")[0].get<std::string>() ==
            "Engineering");
+    assert(engineering.column("Name").type() == datatable::CellType::string);
+    assert(engineering.column("Department").type() ==
+           datatable::CellType::string);
+
+    const DataTable no_matches = filterEquals(table, 1, Cell{"Unknown"});
+    assert(no_matches.empty());
+    assert(no_matches.column("Name").type() == datatable::CellType::string);
 
     // An empty predicate is rejected explicitly instead of failing during
     // iteration with an unclear callable error.
