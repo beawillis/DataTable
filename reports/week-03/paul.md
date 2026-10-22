@@ -5,7 +5,7 @@
 
 ## 1. Week 3 objective
 
-Extend console presentation so callers can control alignment, column widths,
+Extended console presentation so callers can control alignment, column widths,
 headers, footers, decimal formatting, borders, and other display styles
 without changing the underlying `DataTable`.
 
@@ -119,7 +119,7 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate any new formatting options with the table and export owners.
-2. Add agreed support for multiline display values if required.
-3. Consider reusable footer helpers after aggregation requirements are
+1. Coordinating any new formatting options with the table and export owners.
+2. Adding agreed support for multiline display values if required.
+3. Considering reusable footer helpers after aggregation requirements are
    finalized.

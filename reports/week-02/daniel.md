@@ -5,7 +5,7 @@
 
 ## 1. Week 2 objective
 
-Implement CSV-to-`DataTable` loading so CSV text can be parsed, converted into
+Implemented CSV-to-`DataTable` loading so CSV text could be parsed, converted into
 typed cells, and stored in the shared table model without creating a separate
 table representation.
 
@@ -194,8 +194,8 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with table-core and data-model owners before changing shared
+1. Coordinating with table-core and data-model owners before changing shared
    CSV or `DataTable` interfaces.
-2. Extend CSV integration only when the supported data types or table API
+2. Extending CSV integration only when the supported data types or table API
    change.
-3. Keep parser and conversion tests synchronized with any future CSV rules.
+3. Keeping parser and conversion tests synchronized with any future CSV rules.

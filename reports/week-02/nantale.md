@@ -5,10 +5,10 @@
 
 ## 1. Week 2 objective
 
-Implement reusable sorting functionality for `DataTable` rows. Sorting must
-support ascending and descending order, numeric and string values, column
-selection, invalid-column handling, and row integrity so values from the same
-record remain together.
+Implemented reusable sorting functionality for `DataTable` rows. It supports
+ascending and descending order, numeric and string values, column selection,
+invalid-column handling, and row integrity so values from the same record
+remain together.
 
 ## 2. Swabrah's work completed
 
@@ -176,8 +176,8 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Coordinate with the table-core and data-model owners before changing the
+1. Coordinating with the table-core and data-model owners before changing the
    shared sorting or row-replacement interfaces.
-2. Extend sorting tests for additional missing-value and mixed-type policies
+2. Extending sorting tests for additional missing-value and mixed-type policies
    if the team changes those agreed rules.
-3. Implement filtering separately when it is assigned for a later week.
+3. Implementing filtering separately when it is assigned for a later week.

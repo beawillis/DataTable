@@ -5,9 +5,9 @@
 
 ## 1. Week 4 objective
 
-Test sorting in ascending and descending order for numeric and string data,
-including empty results and invalid conditions. Document the complexity and
-confirm that sorting preserves complete row relationships.
+Tested sorting in ascending and descending order for numeric and string data,
+including empty results and invalid conditions. Documented the complexity and
+confirmed that sorting preserves complete row relationships.
 
 ## 2. Tests completed
 
@@ -92,5 +92,5 @@ Full CTest suite: 12/12 tests passed
   API is exposed.
 - Mixed non-numeric cell types use the deterministic variant ordering already
   defined by the implementation.
-- Future comparator features should preserve row integrity and the documented
-  complexity.
+- Preserving row integrity and the documented complexity when adding future
+  comparator features.

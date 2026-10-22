@@ -5,8 +5,8 @@
 
 ## 1. Week 4 objective
 
-Test grouping with one group, multiple groups, duplicate keys, empty tables,
-and invalid column selections. The tests must confirm counts, first-seen key
+Tested grouping with one group, multiple groups, duplicate keys, empty tables,
+and invalid column selections. The tests confirmed counts, first-seen key
 order, and non-mutating behavior.
 
 ## 2. Tests completed

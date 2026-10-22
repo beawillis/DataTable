@@ -5,10 +5,10 @@
 
 ## 1. Week 3 objective
 
-Make CSV input reliable when it contains missing values, malformed records,
-wrong column counts, or file and stream errors. The CSV module must either
-produce valid parsed records or report the problem clearly; it must not build a
-partially aligned `DataTable`.
+Made CSV input reliable when it contains missing values, malformed records,
+wrong column counts, or file and stream errors. The CSV module produces valid
+parsed records or reports the problem clearly; it does not build a partially
+aligned `DataTable`.
 
 ## 2. Work completed
 
@@ -107,9 +107,9 @@ Full CTest suite: 12/12 tests passed
 
 ## 7. Next steps
 
-1. Add file-path convenience APIs only if the team agrees on ownership and
+1. Adding file-path convenience APIs only if the team agrees on ownership and
    error-reporting requirements.
-2. Keep CSV conversion rules synchronized with the supported `CellValue`
+2. Keeping CSV conversion rules synchronized with the supported `CellValue`
    types.
-3. Add more malformed-input cases if the project adopts additional CSV
+3. Adding more malformed-input cases if the project adopts additional CSV
    dialect options.

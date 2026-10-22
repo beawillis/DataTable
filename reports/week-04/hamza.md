@@ -5,7 +5,7 @@
 
 ## 1. Week 4 objective
 
-Test numeric aggregation and invalid aggregation behavior for standalone
+Tested numeric aggregation and invalid aggregation behavior for standalone
 columns and selected `DataTable` columns.
 
 ## 2. Tests completed
@@ -87,4 +87,4 @@ Full CTest suite: 12/12 tests passed
 - Arithmetic results use `double`, so extremely large integer totals may lose
   precision after conversion.
 - Group-level aggregation is not currently part of the aggregation API.
-- Future numeric policies should be agreed with the data-model owner.
+- Agreeing on future numeric policies with the data-model owner.
