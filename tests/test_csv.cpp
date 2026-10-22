@@ -1,6 +1,7 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <cstdint>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -191,6 +192,7 @@ void test_large_csv_input()
 	// Generate a repeatable large input without depending on an external file.
 	std::ostringstream input;
 	input << "Id,Department,Score\n";
+	input << std::fixed << std::setprecision(1);
 	for (std::size_t index = 0; index < 10000; ++index) {
 		input << index << ','
 			  << (index % 2 == 0 ? "Engineering" : "Support") << ','

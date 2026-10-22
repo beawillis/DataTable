@@ -66,6 +66,10 @@ install/
 # Generated documentation
 docs/_build/
 
+# Generated dataset outputs
+data/output/*
+!data/output/.gitkeep
+
 # IDE / editor backup files
 *.bak
 *.orig

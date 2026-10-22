@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -35,7 +35,7 @@ int main()
 
     const std::string compactOutput = formatColumn(scores, compact);
     // A custom style can remove decoration and right-align the values.
-    assert(compactOutput == "|1 \n|20\n");
+    assert(compactOutput == "| 1|\n|20|\n");
     assert(scores.size() == 2);
 
     const DataTable table = DataTable::fromCsv(
@@ -55,7 +55,7 @@ int main()
     noDecoration.setPadding(0);
     // Formatting options can produce a compact console representation.
     const std::string plainOutput = formatTable(table, noDecoration);
-    assert(plainOutput == "|Ada  |10 \n|Grace|200\n");
+    assert(plainOutput == "|Ada  |10   |\n|Grace|200  |\n");
 
     Style detailed;
     // Precision changes display text without changing stored cell values.
@@ -65,7 +65,7 @@ int main()
     const DataTable decimalTable = DataTable::fromCsv(
         "Name,Score\n"
         "Ada,10.5\n"
-        "Grace,20\n"
+        "Grace,20.0\n"
     );
     const std::string detailedOutput = formatTable(decimalTable, detailed);
     assert(detailedOutput.find("10.50") != std::string::npos);
@@ -95,7 +95,8 @@ int main()
     mixed.addColumn("Description with a deliberately long column name");
     mixed.addColumn("Value");
     mixed.addRow(Row{
-        Cell{std::numeric_limits<std::int64_t>::max()},
+        Cell{static_cast<std::uint64_t>(
+            std::numeric_limits<std::int64_t>::max())},
         Cell{"short"},
         Cell{true}
     });

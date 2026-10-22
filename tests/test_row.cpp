@@ -1,6 +1,6 @@
 #include "datatable/row.hpp"
 
-#include <cassert>
+#include "test_assert.hpp"
 #include <stdexcept>
 #include <string>
 #include <type_traits>

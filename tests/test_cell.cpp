@@ -1,6 +1,6 @@
 #include "datatable/cell.hpp"
 
-#include <cassert>
+#include "test_assert.hpp"
 #include <cstdint>
 #include <limits>
 #include <stdexcept>

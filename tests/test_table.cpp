@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test_assert.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -152,6 +152,109 @@ void test_csv_width_validation()
     assert(exception_thrown);
 }
 
+void test_row_update_and_removal()
+{
+    DataTable table;
+    table.addColumn("Name", datatable::CellType::string);
+    table.addColumn("Age", datatable::CellType::signed_integer);
+    table.addRow(Row{{"Ada", 36}});
+    table.addRow(Row{{"Grace", 28}});
+
+    // Updating a row updates the row and every synchronized column view.
+    table.updateRow(1, Row{{"Grace Hopper", 85}});
+    assert(table.rows()[1][0].get<std::string>() == "Grace Hopper");
+    assert(table.column("Name")[1].get<std::string>() == "Grace Hopper");
+    assert(table.column("Age")[1].get<std::int64_t>() == 85);
+    assert(table.rowCount() == 2);
+
+    bool wrong_type_rejected = false;
+    try {
+        table.updateRow(0, Row{{"Ada", "thirty-six"}});
+    }
+    catch (const std::invalid_argument&) {
+        wrong_type_rejected = true;
+    }
+    assert(wrong_type_rejected);
+    assert(table.rows()[0][1].get<std::int64_t>() == 36);
+
+    bool wrong_width_rejected = false;
+    try {
+        table.updateRow(0, Row{{"Ada"}});
+    }
+    catch (const std::invalid_argument&) {
+        wrong_width_rejected = true;
+    }
+    assert(wrong_width_rejected);
+
+    bool invalid_update_rejected = false;
+    try {
+        table.updateRow(99, Row{{"Nobody", 0}});
+    }
+    catch (const std::out_of_range&) {
+        invalid_update_rejected = true;
+    }
+    assert(invalid_update_rejected);
+
+    // Removal keeps the remaining row and both columns aligned.
+    table.removeRow(0);
+    assert(table.rowCount() == 1);
+    assert(table.rows()[0][0].get<std::string>() == "Grace Hopper");
+    assert(table.column("Name").size() == 1);
+    assert(table.column("Age")[0].get<std::int64_t>() == 85);
+    assert(table.column("Name").type() == datatable::CellType::string);
+
+    bool invalid_remove_rejected = false;
+    try {
+        table.removeRow(1);
+    }
+    catch (const std::out_of_range&) {
+        invalid_remove_rejected = true;
+    }
+    assert(invalid_remove_rejected);
+
+    table.removeRow(0);
+    assert(table.empty());
+    assert(table.columnCount() == 2);
+    assert(table.column("Age").type() == datatable::CellType::signed_integer);
+}
+
+void test_homogeneous_column_validation()
+{
+    DataTable table;
+    table.addColumn("Score");
+    table.addColumn("Note");
+    table.addRow(Row{{1.5, "good"}});
+
+    bool mixed_column_rejected = false;
+    try {
+        table.addRow(Row{{2, "also good"}});
+    }
+    catch (const std::invalid_argument&) {
+        mixed_column_rejected = true;
+    }
+    assert(mixed_column_rejected);
+    assert(table.rowCount() == 1);
+    assert(table.column("Score").type() == datatable::CellType::floating_point);
+
+    bool mixed_csv_rejected = false;
+    try {
+        (void)DataTable::fromCsv(
+            "Score\n"
+            "1.5\n"
+            "2\n"
+        );
+    }
+    catch (const std::invalid_argument&) {
+        mixed_csv_rejected = true;
+    }
+    assert(mixed_csv_rejected);
+
+    // Null values are accepted without weakening the established column type.
+    table.addRow(Row{{nullptr, "missing score"}});
+    assert(table.rowCount() == 2);
+    assert(table.column("Score").type() == datatable::CellType::floating_point);
+}
+
 void test_full_module_integration()
 {
     // Load one shared table so every module works with the same schema and
@@ -180,7 +283,7 @@ void test_full_module_integration()
     assert(groups.size() == 1);
     assert(groups[0].count() == 2);
     assert(datatable::count(ordered, 2) == 2);
-    assert(datatable::mean(ordered, 2) == 97.5);
+    assert(datatable::mean(ordered, 2) == 97.25);
 
     const std::string formatted = datatable::formatTable(ordered);
     // Formatting reads the table and returns presentation text only.
@@ -209,6 +312,8 @@ int main()
     test_invalid_schema_operations();
     test_csv_integration();
     test_csv_width_validation();
+    test_row_update_and_removal();
+    test_homogeneous_column_validation();
     test_full_module_integration();
 
     std::cout << "All DataTable core tests passed.\n";

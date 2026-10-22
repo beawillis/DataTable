@@ -39,6 +39,26 @@ bool Cell::isNull() const noexcept
     return holds<std::monostate>();
 }
 
+CellType Cell::type() const noexcept
+{
+    if (holds<std::monostate>()) {
+        return CellType::null;
+    }
+    if (holds<bool>()) {
+        return CellType::boolean;
+    }
+    if (holds<std::int64_t>()) {
+        return CellType::signed_integer;
+    }
+    if (holds<std::uint64_t>()) {
+        return CellType::unsigned_integer;
+    }
+    if (holds<double>()) {
+        return CellType::floating_point;
+    }
+    return CellType::string;
+}
+
 const CellValue& Cell::value() const noexcept
 {
     return value_;

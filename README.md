@@ -27,9 +27,10 @@ cells remain consistent.
 
 ## Project status
 
-The core library, module tests, and CMake build are implemented. The current
-test suite contains 12 registered test programs covering the data model, CSV
-I/O, table operations, formatting, styling, and export.
+The library modules, integration workflow, examples, and CMake build are
+implemented. The test suite registers 12 module tests plus 7 executable-example
+smoke tests covering the data model, transformations, formatting, styling,
+export, and end-to-end usage.
 
 The project is developed as a group assignment. Each contributor owns a
 module, while `DataTable` is the shared integration boundary.
@@ -40,8 +41,10 @@ module, while `DataTable` is the shared integration boundary.
   double, or string values.
 - `Row` and `Column` data-model classes with ownership and bounds validation.
 - Central `DataTable` storage for schema, rows, and columns.
-- Row insertion, table clearing, column lookup, and synchronized row
-  replacement.
+- Explicitly typed or type-inferred homogeneous columns; null cells are
+  accepted without changing a column's value type.
+- Row insertion, update, removal, table clearing, column lookup, and
+  synchronized row replacement.
 - CSV parsing into string records.
 - CSV loading into a typed `DataTable`.
 - Missing CSV fields represented as null cells.
@@ -53,7 +56,7 @@ module, while `DataTable` is the shared integration boundary.
 - Console formatting with headers, borders, alignment, padding, and
   automatically calculated widths.
 - CSV export of headers and row values with CSV escaping.
-- HTML schema export.
+- Complete HTML export with escaped headers and row values.
 - CMake installation and package target generation.
 - Focused module tests and full CTest validation.
 
@@ -120,9 +123,16 @@ DataTable/
 ├── examples/
 │   ├── CMakeLists.txt
 │   ├── basic_table.cpp
-│   └── reserved example files
+│   ├── csv_example.cpp
+│   ├── filtering_example.cpp
+│   ├── grouping_example.cpp
+│   ├── export_example.cpp
+│   ├── integration_example.cpp
+│   └── performance_example.cpp
 ├── reports/
 │   ├── README.md
+│   ├── General-Report.md
+│   ├── Final-Presentation.md
 │   ├── week-01/
 │   ├── week-02/
 │   ├── week-03/
@@ -164,6 +174,8 @@ trailing whitespace remain strings rather than being silently trimmed.
 
 The project has no third-party runtime dependency. Tests use the C++ standard
 library and `assert`; they do not require an external test framework.
+Assertions remain enabled in Release test builds so test checks are not
+silently removed by `NDEBUG`.
 
 ## Build and test
 
@@ -182,13 +194,14 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-The verified project validation is 12/12 tests passing.
+The registered tests include the module tests and executable examples.
 
 To include examples, leave the default CMake option enabled:
 
 ```bash
 cmake -S . -B build -DDATATABLE_BUILD_EXAMPLES=ON
 cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
 To build without tests or examples:
@@ -244,16 +257,25 @@ read the table without changing it.
 
 ```cpp
 datatable::DataTable table;
-table.addColumn("Name");
-table.addColumn("Age");
+table.addColumn("Name", datatable::CellType::string);
+table.addColumn("Age", datatable::CellType::signed_integer);
 table.addRow(datatable::Row{"Ada", 36});
+table.updateRow(0, datatable::Row{"Ada Lovelace", 36});
+table.removeRow(0);
 
 table.rowCount();
 table.columnCount();
 table.column("Name");
+table.column("Age").type(); // std::optional<CellType>
 table.rows();
 table.columns();
 ```
+
+`addColumn(name, CellType)` declares a column's value type. `addColumn(name)`
+infers it from the first non-null cell. Columns accept null values but reject
+any non-null value with a different type. Table columns are exposed read-only;
+`updateRow()` is the supported way to change table data while preserving the
+row/column views.
 
 ### CSV
 
@@ -263,7 +285,9 @@ datatable::DataTable table = datatable::DataTable::fromCsv(input);
 ```
 
 `parseCsv()` returns string records only. `DataTable::fromCsv()` performs
-typed-cell conversion and validates the table schema.
+typed-cell conversion and validates the table schema. Non-null values in one
+column must have the same `CellType`; null fields are accepted for every
+column. Mixed-type CSV columns are rejected rather than silently coerced.
 
 ### Sorting and filtering
 
@@ -303,8 +327,8 @@ datatable::write_csv(table, output);
 datatable::write_html(table, output);
 ```
 
-CSV export includes headers and all rows. HTML export currently exports the
-table schema rather than complete row data.
+CSV and HTML export include headers and all rows. HTML text is escaped before
+being written.
 
 ## Validation and error handling
 
@@ -313,6 +337,8 @@ The library reports invalid input explicitly:
 - Invalid row widths raise `std::invalid_argument`.
 - Empty or duplicate column names raise `std::invalid_argument`.
 - Invalid row or column indexes raise `std::out_of_range`.
+- Non-null values that do not match an established or declared column type
+  raise `std::invalid_argument`; null values are accepted by every column.
 - Incorrect typed `Cell` access raises `std::bad_variant_access`.
 - Null C-string values are rejected.
 - Malformed CSV quoting raises `std::invalid_argument`.
@@ -337,29 +363,27 @@ copies. Operations that produce a new result, such as filtering, make an
 independent table by design. Sorting reorders complete rows and rebuilds the
 column view so values from one record remain together.
 
-The `performance_example` provides a repeatable 10,000-row integration smoke
-test and reports elapsed pipeline time. It is not a formal benchmark, and
-results depend on the build, platform, and machine load.
+The `performance_example` reports CSV loading, filtering, sorting,
+grouping/aggregation, and CSV/HTML export timings for 1,000, 10,000, and
+100,000 rows. It is an in-memory smoke benchmark, not a statistically rigorous
+or cross-library comparison; results depend on the build, platform, and
+machine load.
 
 ## Examples
 
-The following examples are currently registered and built by CMake:
+The following examples are registered, built, and executed as CTest smoke
+tests when tests and examples are enabled:
 
 - `basic_table_example`
+- `csv_example`
+- `filtering_example`
+- `grouping_example`
+- `export_example`
 - `integration_example`
 - `performance_example`
+- `dataset_example` (loads a caller-supplied CSV for sort, filter, format,
+  group, and CSV/HTML export; see [data/README.md](data/README.md))
 
-The remaining reserved example filenames are not currently populated with
-complete programs.
-
-The available test programs provide additional working usage examples for:
-
-- table construction;
-- CSV loading;
-- sorting and filtering;
-- grouping and aggregation;
-- formatting and styling; and
-- CSV and HTML export.
 
 ## Reports
 
@@ -370,6 +394,8 @@ Individual contributor reports are organized by week in [reports/README.md](repo
 - [Week 3](reports/week-03/)
 - [Week 4](reports/week-04/)
 - [Final reports](reports/final/)
+- [General project report](reports/General-Report.md)
+- [Final presentation outline](reports/Final-Presentation.md)
 
 The Week 3 report folder also contains the class-layout image used for the
 object-oriented design documentation.
@@ -380,16 +406,16 @@ object-oriented design documentation.
   unsigned integer, double, and string.
 - CSV loading currently accepts text input streams and strings; there is no
   dedicated file-path convenience function.
-- CSV type inference is intentionally conservative and does not trim fields.
+- CSV type inference is intentionally conservative, does not trim fields, and
+  rejects non-null type mismatches within a column.
 - Sorting and equality behavior is defined for the supported cell types; no
   custom comparator API is currently exposed.
 - Grouping returns keys and counts, but does not produce grouped subtables.
 - Aggregation is not yet integrated into grouped result objects.
-- HTML export currently exports the schema only.
-- The formatter supports basic alignment, borders, headers, padding, and
-  automatic widths; advanced themes and footers are not implemented.
-- The project does not currently provide a benchmark suite.
-- The reserved example files still need complete demonstrations.
+- The formatter supports alignment, borders, headers, footers, decimal
+  precision, padding, and automatic widths; richer themes are not implemented.
+- Performance measurements are smoke benchmarks, not formal statistical
+  benchmarks.
 
 ## Team ownership
 
@@ -409,14 +435,11 @@ should be changed in coordination with their owners and the table integrator.
 
 ## Contributing
 
-1. Each member worked only on the assigned module unless the team agrees otherwise.
-2. Changes were co-ordinated to shared interfaces before implementing dependent work.
-3. Feature branches were used and kept  synchronized with `develop` when needed.
-4. Focused tests were run and the full CTest suite.
-6. Clear commits were used and pushed to the feature branch.
-7. Pull requests were opened targeting `develop`.
-8. Addressing review feedback was done before merging.
-   `Main` is  stable and submission-ready.
+1. Worked within the assigned module unless the team agrees otherwise.
+2. Coordinated shared-interface changes with the responsible module owners.
+3. Built and tested focused changes, then run the full CTest suite.
+4. Used meaningful commits and submit feature work for review before merging.
+5. Kept `main` stable and submission-ready.
 
 ## AI use declaration
 
