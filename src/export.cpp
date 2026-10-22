@@ -90,7 +90,17 @@ void write_html(const DataTable& table, std::ostream& output)
 	// Build a complete HTML document containing the current column headers.
 	output << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
 			  "<meta charset=\"UTF-8\">\n<title>DataTable Export</title>\n"
-			  "</head>\n<body>\n<table>\n<thead>\n<tr>";
+			  "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+			  "<style>\n"
+			  "body{font-family:Segoe UI,Arial,sans-serif;margin:2rem;color:#1f2937;"
+			  "background:#f3f6fa}\n"
+			  "table{border-collapse:collapse;background:#fff;min-width:60%;"
+			  "box-shadow:0 2px 10px #00000014}\n"
+			  "th,td{padding:.65rem .9rem;border:1px solid #d8e0ea;text-align:left}\n"
+			  "th{background:#174a7e;color:#fff}\n"
+			  "tbody tr:nth-child(even){background:#edf3f8}\n"
+			  "tbody tr:hover{background:#dceafa}\n"
+			  "</style>\n</head>\n<body>\n<table>\n<thead>\n<tr>";
 	for (const auto& name : table.columnNames()) {
 		output << "<th>";
 		write_html_escaped(name, output);
