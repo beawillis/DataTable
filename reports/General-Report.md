@@ -85,6 +85,22 @@ The generated browser-ready table is
 [bike-sharing-season-summary.html](./visuals/bike-sharing-season-summary.html).
 The supplied screenshots below are included in the report visuals folder.
 
+The solar-angle dataset is also exported as a browser-ready heatmap:
+[solar-zenith-heatmap.html](./visuals/solar-zenith-heatmap.html). It filters
+the measurements to latitude 20 degrees north and arranges months as rows and
+true solar times as columns. Each valid value receives a background color on
+a yellow-to-purple scale (0–90 degrees); blank cells represent times before
+sunrise.
+
+Additional browser-ready, value-colored tables are available for the
+[car-specification correlation matrix](./visuals/gtcars-correlation-heatmap.html),
+[daily rentals](./visuals/bike-day-heatmap.html), and
+[hourly rentals](./visuals/bike-hour-heatmap.html). The car matrix uses a
+blue-white-red diverging scale for negative, near-zero, and positive Pearson
+correlations. The Bike Sharing heatmaps group records by season and month
+(daily data) or hour (hourly data) and color average rental counts from lower
+to higher values.
+
 **Figure 1. Formatted Bike Sharing table (first view).**
 
 ![Formatted Bike Sharing table, first view](./visuals/formatted.png)
@@ -103,6 +119,34 @@ The supplied screenshots below are included in the report visuals folder.
 | Summer | 92 | 571,273 | 6,209.49 | 1,027 | 8,362 |
 | Winter | 89 | 515,476 | 5,791.87 | 22 | 8,555 |
 | Spring | 91 | 321,348 | 3,531.30 | 441 | 7,836 |
+
+### Color-coded heatmap screenshots
+
+The following screenshots show the browser-rendered heatmaps. Daily Bike
+Sharing, hourly Bike Sharing and solar zenith are split into top and bottom
+captures so the complete tables can be read.
+
+**Figure 4. Daily Bike Sharing heatmap, top and bottom.**
+
+| Top | Bottom |
+|---|---|
+| ![Daily Bike Sharing heatmap, top](./visuals/bike-day-heatmap-top.png) | ![Daily Bike Sharing heatmap, bottom](./visuals/bike-day-heatmap-bottom.png) |
+
+**Figure 5. Hourly Bike Sharing heatmap, top and bottom.**
+
+| Top | Bottom |
+|---|---|
+| ![Hourly Bike Sharing heatmap, top](./visuals/bike-hour-heatmap-top.png) | ![Hourly Bike Sharing heatmap, bottom](./visuals/bike-hour-heatmap-bottom.png) |
+
+**Figure 6. Solar zenith heatmap, top and bottom.**
+
+| Top | Bottom |
+|---|---|
+| ![Solar zenith heatmap, top](./visuals/solar-zenith-heatmap-top.png) | ![Solar zenith heatmap, bottom](./visuals/solar-zenith-heatmap-bottom.png) |
+
+**Figure 7. Car specification correlation heatmap.**
+
+![Car specification correlation heatmap](./visuals/gtcars-correlation-heatmap.png)
 
 ## Architecture
 
@@ -156,6 +200,10 @@ cmake --install build --config Release --prefix install
 - Clean Release configure and build: passed.
 - Release CTest: 19/19 passed.
 - Debug CTest: 19/19 passed.
+- The project owner confirmed that all tests passed while testing the project
+  on a second machine. Its operating system, compiler, build configuration and
+  test log were not provided, so the result is user-reported and was not
+  independently verified in this workspace.
 - CTest coverage comprises 12 module test programs and 7 executable-example
   smoke tests.
 - Test assertions remain enabled in Release builds; the test support header
