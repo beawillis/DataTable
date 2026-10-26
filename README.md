@@ -398,6 +398,10 @@ Individual contributor reports are organized by week in [reports/README.md](repo
 - [General project report](reports/General-Report.md)
 - [Final presentation outline](reports/Final-Presentation.md)
 - [Report visuals](reports/visuals/)
+- [Color-coded solar zenith heatmap](reports/visuals/solar-zenith-heatmap.html)
+- [Car correlation heatmap](reports/visuals/gtcars-correlation-heatmap.html)
+- [Daily Bike Sharing heatmap](reports/visuals/bike-day-heatmap.html)
+- [Hourly Bike Sharing heatmap](reports/visuals/bike-hour-heatmap.html)
 
 The report visuals include formatted Bike Sharing table previews and a
 seasonal summary sorted by total rentals:
@@ -405,6 +409,21 @@ seasonal summary sorted by total rentals:
 | Formatted table preview | Continued table preview | Sorted seasonal summary |
 |---|---|---|
 | ![Formatted Bike Sharing table](reports/visuals/formatted.png) | ![Continued formatted Bike Sharing table](reports/visuals/formatted-preview.png) | ![Bike Sharing seasonal summary sorted by total rentals](reports/visuals/sorted-season.png) |
+
+The value-colored heatmap screenshots are also included below. Long tables are
+split into top and bottom captures for readability.
+
+| Daily Bike Sharing (top) | Daily Bike Sharing (bottom) |
+|---|---|
+| ![Daily Bike Sharing heatmap, top](reports/visuals/bike-day-heatmap-top.png) | ![Daily Bike Sharing heatmap, bottom](reports/visuals/bike-day-heatmap-bottom.png) |
+
+| Hourly Bike Sharing (top) | Hourly Bike Sharing (bottom) |
+|---|---|
+| ![Hourly Bike Sharing heatmap, top](reports/visuals/bike-hour-heatmap-top.png) | ![Hourly Bike Sharing heatmap, bottom](reports/visuals/bike-hour-heatmap-bottom.png) |
+
+| Solar zenith (top) | Solar zenith (bottom) | Car correlation |
+|---|---|---|
+| ![Solar zenith heatmap, top](reports/visuals/solar-zenith-heatmap-top.png) | ![Solar zenith heatmap, bottom](reports/visuals/solar-zenith-heatmap-bottom.png) | ![Car correlation heatmap](reports/visuals/gtcars-correlation-heatmap.png) |
 
 The Week 3 report folder also contains the class-layout image used for the
 object-oriented design documentation.
