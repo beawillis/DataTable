@@ -7,10 +7,9 @@ namespace datatable {
 
 class DataTable;
 
-// Write the complete table as CSV or HTML to an existing output stream.
+// Write the complete table as CSV to an existing output stream.
 // Stream failures raise std::ios_base::failure.
 void write_csv(const DataTable& table, std::ostream& output);
-void write_html(const DataTable& table, std::ostream& output);
 
 } // namespace datatable
 

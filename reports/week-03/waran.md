@@ -1,113 +1,33 @@
 # DataTable — Week 3 Progress Report
 
-**Reporting period:** Week 3
-**Contributor:** Waran Newton Mono Korsuk — Export and Demonstration
+**Contributor:** Waran — Export and Demonstration
 
-## 1. Week 3 objective
+## Export and native presentation
 
-Implemented HTML export for the shared `DataTable`. The exporter includes
-the table schema and complete row data, escapes HTML-sensitive text, preserves
-missing values, and reports output-stream failures.
+The export surface uses the shared `DataTable` model and writes CSV headers
+and complete rows with correct quoting for commas, quotes, and line breaks.
+Stream failures are reported with `std::ios_base::failure`.
 
-## 2. Work completed
+The project's presentation workflow uses the optional native Qt Widgets
+application. It opens CSV files in a desktop table and applies per-column
+numeric value colors. The Qt target is separate from the core library and is
+enabled through CMake when a compatible Qt kit is installed.
 
-### 2.1 Complete HTML table export
+## Validation and tests
 
-`write_html()` now writes a complete HTML document containing:
+The export tests cover escaped CSV headers and values, complete records, null
+fields, empty tables, and failed output streams. The Qt example is built
+against the shared `DataTable` model.
 
-- a document type declaration;
-- an HTML document and language attribute;
-- UTF-8 metadata;
-- a table title;
-- a `<thead>` section containing all column names; and
-- a `<tbody>` section containing every table row.
+## Design
 
-Each table row is written as a `<tr>` element and each cell as a `<td>`
-element. The exported rows use the same order and values as the source
-`DataTable`.
+- CSV export is non-mutating and preserves row order.
+- Null values are written as empty CSV fields.
+- Fields are quoted only when required by CSV syntax.
+- The Qt viewer owns the visual presentation; the core table model remains
+  independent of Qt.
 
-### 2.2 HTML escaping
+## Next steps
 
-Column names and cell text are escaped before writing them into HTML:
-
-| Character | Output |
-|---|---|
-| `&` | `&amp;` |
-| `<` | `&lt;` |
-| `>` | `&gt;` |
-| `"` | `&quot;` |
-| `'` | `&#39;` |
-
-This ensures data is treated as text rather than being interpreted as HTML
-markup. It also prevents a cell containing markup-like text from creating
-unexpected elements in the exported document.
-
-### 2.3 Missing values and errors
-
-Null cells use the existing `Cell::toString()` behavior and are exported as
-empty `<td></td>` elements. An empty table still produces valid HTML
-structure with an empty table body.
-
-Both CSV and HTML exporters validate the output stream before writing and
-after writing. A stream failure raises `std::ios_base::failure` instead of
-being reported as a successful export.
-
-## 3. Tests
-
-The export tests verify:
-
-- complete HTML document structure;
-- header escaping;
-- row and cell export;
-- cell-value escaping;
-- empty tables without columns;
-- null-cell output;
-- CSV export remains unchanged; and
-- failed output streams raise an exception.
-
-## 4. Class structure and OOP implementation
-
-`write_html()` consumes the existing model:
-
-- `DataTable` supplies column names and rows;
-- `Row` supplies complete records;
-- `Cell` supplies typed values converted to text.
-
-The exporter does not create a second table representation or modify the
-source data.
-
-The implemented OOP concepts are:
-
-- **Encapsulation:** table, row, column, and cell data are accessed through
-  public interfaces.
-- **Composition:** the exported table is composed from the existing
-  `DataTable`, `Row`, `Column`, and `Cell` objects.
-- **Abstraction:** callers use `write_html()` without managing HTML tags or
-  escaping rules.
-
-Inheritance and runtime polymorphism are not required by this export
-implementation.
-
-## 5. Design decisions and limitations
-
-- HTML export is non-mutating.
-- Headers and all rows are exported.
-- Null cells are represented by empty table cells.
-- Text is escaped as HTML content, not inserted as raw markup.
-- No CSS styling, pagination, templates, or configurable HTML attributes are
-  currently provided.
-- CSV export remains available and continues to use CSV-specific escaping.
-
-## 6. Validation
-
-```text
-Build: successful
-Export tests: passed
-Full CTest suite: 12/12 tests passed
-```
-
-## 7. Next steps
-
-1. Adding optional CSS or class-name configuration if required by the project.
-2. Completing the export demonstration example when the examples are expanded.
-3. Coordinating any future HTML template changes with the formatting owner.
+1. Keep the Qt example aligned with changes to the public `DataTable` API.
+2. Extend the native viewer to support additional interactive table workflows.

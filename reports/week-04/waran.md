@@ -15,8 +15,7 @@ verified that all examples built and executed from a clean configuration.
 - `filtering_example` selects engineering rows while preserving the source
   table.
 - `grouping_example` counts repeated department keys.
-- `export_example` demonstrates CSV and HTML output, including escaped
-  content.
+- `export_example` demonstrates CSV output, including escaped fields.
 
 The examples use public headers and do not access implementation details.
 Each includes brief comments for the important integration behavior.

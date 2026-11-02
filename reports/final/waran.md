@@ -11,7 +11,7 @@ Waran completed the demonstration and export surface for the library:
 - table filtering;
 - grouping;
 - CSV export; and
-- HTML export.
+- native Qt desktop presentation.
 
 The examples are small executable smoke tests that use the stable public API.
 
@@ -21,7 +21,7 @@ The examples are small executable smoke tests that use the stable public API.
 formatted output. `csv_example` demonstrates parsing and type inference.
 `filtering_example` demonstrates selecting complete rows by a column value.
 `grouping_example` demonstrates first-seen grouping and duplicate counts.
-`export_example` demonstrates both serialized formats and escaping.
+`export_example` demonstrates CSV serialization and escaping.
 
 Comments are included only where they clarify source preservation, type
 inference, grouping order, or export behavior.

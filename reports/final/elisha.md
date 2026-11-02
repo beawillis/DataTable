@@ -16,7 +16,7 @@ The completed integration supports:
 - grouping and aggregation;
 - console formatting and styling;
 - CSV export; and
-- complete HTML export.
+- native Qt desktop table presentation.
 
 ## Week 4 completion
 

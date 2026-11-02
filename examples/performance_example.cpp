@@ -79,17 +79,11 @@ void runSample(std::size_t rowCount)
         datatable::write_csv(selected, csvOutput);
     });
 
-    std::ostringstream htmlOutput;
-    const long long htmlExportTime = measureMicroseconds([&] {
-        datatable::write_html(selected, htmlOutput);
-    });
-
     if (table.rowCount() != rowCount ||
         selected.rowCount() != rowCount / 2 ||
         groups.size() != 2 ||
         datatable::count(selected, 2) != selected.rowCount() ||
-        csvOutput.tellp() <= 0 ||
-        htmlOutput.tellp() <= 0) {
+        csvOutput.tellp() <= 0) {
         throw std::runtime_error("Performance example validation failed.");
     }
 
@@ -102,8 +96,7 @@ void runSample(std::size_t rowCount)
               << "  Sort: " << sortTime << " us\n"
               << "  Group: " << groupTime << " us\n"
               << "  Mean: " << aggregateTime << " us\n"
-              << "  CSV export: " << csvExportTime << " us\n"
-              << "  HTML export: " << htmlExportTime << " us\n";
+              << "  CSV export: " << csvExportTime << " us\n";
 }
 
 } // namespace

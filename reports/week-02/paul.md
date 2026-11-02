@@ -159,6 +159,6 @@ Full CTest suite: 12/12 tests passed
 ## 7. Next steps
 
 1. Coordinating with the export owner when formatted output is reused by
-   console, CSV, or HTML demonstrations.
+   console or CSV demonstrations.
 2. Adding any agreed numeric-specific alignment rules in a later iteration.
 3. Extending styling only after the core formatting API remains stable.

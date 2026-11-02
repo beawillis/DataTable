@@ -56,7 +56,9 @@ module, while `DataTable` is the shared integration boundary.
 - Console formatting with headers, borders, alignment, padding, and
   automatically calculated widths.
 - CSV export of headers and row values with CSV escaping.
-- Complete HTML export with escaped headers and row values.
+- Optional native Qt viewer for CSV tables with per-column numeric color
+  scales, plus a rolling live table and graph; the core library remains
+  independent of Qt.
 - CMake installation and package target generation.
 - Focused module tests and full CTest validation.
 
@@ -122,6 +124,7 @@ DataTable/
 │   └── test_*.cpp
 ├── examples/
 │   ├── CMakeLists.txt
+│   ├── qt_live_viewer.cpp
 │   ├── basic_table.cpp
 │   ├── csv_example.cpp
 │   ├── filtering_example.cpp
@@ -324,11 +327,9 @@ style.setAlignment(datatable::Alignment::right);
 std::cout << datatable::formatTable(table, style);
 
 datatable::write_csv(table, output);
-datatable::write_html(table, output);
 ```
 
-CSV and HTML export include headers and all rows. HTML text is escaped before
-being written.
+CSV export includes headers and all rows.
 
 ## Validation and error handling
 
@@ -364,7 +365,7 @@ independent table by design. Sorting reorders complete rows and rebuilds the
 column view so values from one record remain together.
 
 The `performance_example` reports CSV loading, filtering, sorting,
-grouping/aggregation, and CSV/HTML export timings for 1,000, 10,000, and
+grouping/aggregation, and CSV export timings for 1,000, 10,000, and
 100,000 rows. It is an in-memory smoke benchmark, not a statistically rigorous
 or cross-library comparison; results depend on the build, platform, and
 machine load.
@@ -381,9 +382,41 @@ tests when tests and examples are enabled:
 - `export_example`
 - `integration_example`
 - `performance_example`
-- `dataset_example` (loads a caller-supplied CSV for sort, filter, format,
-  group, and CSV/HTML export, including an aggregated seasonal summary; see
-  [data/README.md](data/README.md))
+
+### Optional native Qt viewer
+
+The optional `qt_live_viewer` example opens a native Qt desktop table for a
+CSV file and colors numeric cells from lower to higher values within each
+column. Run it with a CSV path to display a dataset, or without arguments to
+show the live demonstration: a table and graph updated every 100 ms from a
+sample sine wave. The live view keeps a bounded rolling window of 120 rows.
+
+The graph is drawn directly with Qt's `QPainter`. Dataset tables use Qt's
+model/view widgets. Qt is an optional build and
+runtime dependency for the viewer and is not required by the DataTable library
+or its standard examples. For deployment, use a matching Qt build and package
+the Qt runtime libraries and platform plugin with the application.
+
+With Qt 5 or Qt 6 development files available to CMake, configure and build
+the application with a compiler and generator compatible with that Qt kit.
+For example, a MinGW Qt kit requires its matching MinGW compiler:
+
+```powershell
+cmake -S . -B build-qt -G Ninja `
+  -DCMAKE_CXX_COMPILER="C:\path\to\Qt\Tools\mingw\bin\g++.exe" `
+  -DCMAKE_PREFIX_PATH="C:\path\to\Qt\<version>\mingw_64" `
+  -DDATATABLE_BUILD_QT_LIVE_VIEWER=ON `
+  -DDATATABLE_BUILD_TESTS=OFF
+cmake --build build-qt --target qt_live_viewer
+.\build-qt\examples\qt_live_viewer.exe .\data\input\day.csv
+```
+
+Run without a CSV path to see the live demonstration. The
+[data README](data/README.md) contains build commands, dataset examples, and
+transformation workflows. The `dataset_example` console tool sorts, filters,
+formats, groups, summarizes, and exports CSV data; use the Qt viewer to display
+an input or generated CSV file. Native Qt is the project's visualization and
+table presentation interface.
 
 
 ## Reports
@@ -398,32 +431,12 @@ Individual contributor reports are organized by week in [reports/README.md](repo
 - [General project report](reports/General-Report.md)
 - [Final presentation outline](reports/Final-Presentation.md)
 - [Report visuals](reports/visuals/)
-- [Color-coded solar zenith heatmap](reports/visuals/solar-zenith-heatmap.html)
-- [Car correlation heatmap](reports/visuals/gtcars-correlation-heatmap.html)
-- [Daily Bike Sharing heatmap](reports/visuals/bike-day-heatmap.html)
-- [Hourly Bike Sharing heatmap](reports/visuals/bike-hour-heatmap.html)
 
-The report visuals include formatted Bike Sharing table previews and a
-seasonal summary sorted by total rentals:
-
-| Formatted table preview | Continued table preview | Sorted seasonal summary |
-|---|---|---|
-| ![Formatted Bike Sharing table](reports/visuals/formatted.png) | ![Continued formatted Bike Sharing table](reports/visuals/formatted-preview.png) | ![Bike Sharing seasonal summary sorted by total rentals](reports/visuals/sorted-season.png) |
-
-The value-colored heatmap screenshots are also included below. Long tables are
-split into top and bottom captures for readability.
-
-| Daily Bike Sharing (top) | Daily Bike Sharing (bottom) |
-|---|---|
-| ![Daily Bike Sharing heatmap, top](reports/visuals/bike-day-heatmap-top.png) | ![Daily Bike Sharing heatmap, bottom](reports/visuals/bike-day-heatmap-bottom.png) |
-
-| Hourly Bike Sharing (top) | Hourly Bike Sharing (bottom) |
-|---|---|
-| ![Hourly Bike Sharing heatmap, top](reports/visuals/bike-hour-heatmap-top.png) | ![Hourly Bike Sharing heatmap, bottom](reports/visuals/bike-hour-heatmap-bottom.png) |
-
-| Solar zenith (top) | Solar zenith (bottom) | Car correlation |
-|---|---|---|
-| ![Solar zenith heatmap, top](reports/visuals/solar-zenith-heatmap-top.png) | ![Solar zenith heatmap, bottom](reports/visuals/solar-zenith-heatmap-bottom.png) | ![Car correlation heatmap](reports/visuals/gtcars-correlation-heatmap.png) |
+The native Qt viewer is the presentation interface for the included CSV
+datasets. Follow the [data README](data/README.md) to build the viewer, open the
+daily and hourly Bike Sharing data, solar zenith data, and car specifications,
+and recreate the project visuals as PNG images without a browser. The generated
+Qt captures are saved in [reports/visuals/qt-native/](reports/visuals/qt-native/).
 
 The Week 3 report folder also contains the class-layout image used for the
 object-oriented design documentation.
