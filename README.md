@@ -429,7 +429,6 @@ Individual contributor reports are organized by week in [reports/README.md](repo
 - [Week 4](reports/week-04/)
 - [Final reports](reports/final/)
 - [General project report](reports/General-Report.md)
-- [Final presentation outline](reports/Final-Presentation.md)
 - [Report visuals](reports/visuals/)
 
 The native Qt viewer is the presentation interface for the included CSV
@@ -437,6 +436,20 @@ datasets. Follow the [data README](data/README.md) to build the viewer, open the
 daily and hourly Bike Sharing data, solar zenith data, and car specifications,
 and recreate the project visuals as PNG images without a browser. The generated
 Qt captures are saved in [reports/visuals/qt-native/](reports/visuals/qt-native/).
+
+### Sample Qt visuals
+
+**Bike Sharing daily rentals heatmap**
+
+![Native Qt heatmap of average Bike Sharing rentals by month and year](reports/visuals/qt-native/bike-day-heatmap-top.png)
+
+**Solar zenith angles by month and true solar time**
+
+![Native Qt heatmap of solar zenith angles](reports/visuals/qt-native/solar-zenith-heatmap-top.png)
+
+**Car specification correlations**
+
+![Native Qt heatmap of Pearson correlations between car specifications](reports/visuals/qt-native/gtcars-correlation-heatmap.png)
 
 The Week 3 report folder also contains the class-layout image used for the
 object-oriented design documentation.
