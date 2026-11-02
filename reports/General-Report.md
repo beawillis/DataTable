@@ -5,7 +5,7 @@
 DataTable is a C++17 library for storing and presenting tabular data through one
 shared `DataTable` representation. The implemented project includes typed cells,
 rows and columns; table mutation; CSV input; sorting, filtering, grouping and
-aggregation; formatting and styling; CSV and HTML output; examples; tests; and
+aggregation; formatting and styling; CSV output; examples; tests; and
 CMake installation support.
 
 The integration pass made the table model enforce homogeneous non-null column
@@ -67,9 +67,8 @@ this report.
 - Footer width is validated against the table schema. Formatting reads data
   without changing the underlying table.
 - CSV export writes headers and complete rows with field escaping.
-- HTML export writes a complete HTML document, including headers and rows, and
-  escapes markup-sensitive characters. Exported HTML includes a simple
-  responsive table style for browser viewing and screenshots.
+- Native Qt provides the desktop table viewer and color-coded presentation
+  for the supplied CSV datasets.
 - Seven executable examples demonstrate table creation, CSV, filtering,
   grouping, export, integration and a performance sample.
 
@@ -81,37 +80,14 @@ calculates the number of days and the total, average, minimum and maximum daily
 rentals (`cnt`) for each season, then sorts seasons by total rentals in
 descending order. The average is displayed to two decimal places.
 
-The generated browser-ready table is
-[bike-sharing-season-summary.html](./visuals/bike-sharing-season-summary.html).
-The supplied screenshots below are included in the report visuals folder.
+The `dataset_example summary` command writes this result as CSV, which can be
+opened in the native Qt viewer described in [data/README.md](../data/README.md).
 
-The solar-angle dataset is also exported as a browser-ready heatmap:
-[solar-zenith-heatmap.html](./visuals/solar-zenith-heatmap.html). It filters
-the measurements to latitude 20 degrees north and arranges months as rows and
-true solar times as columns. Each valid value receives a background color on
-a yellow-to-purple scale (0–90 degrees); blank cells represent times before
-sunrise.
-
-Additional browser-ready, value-colored tables are available for the
-[car-specification correlation matrix](./visuals/gtcars-correlation-heatmap.html),
-[daily rentals](./visuals/bike-day-heatmap.html), and
-[hourly rentals](./visuals/bike-hour-heatmap.html). The car matrix uses a
-blue-white-red diverging scale for negative, near-zero, and positive Pearson
-correlations. The Bike Sharing heatmaps group records by season and month
-(daily data) or hour (hourly data) and color average rental counts from lower
-to higher values.
-
-**Figure 1. Formatted Bike Sharing table (first view).**
-
-![Formatted Bike Sharing table, first view](./visuals/formatted.png)
-
-**Figure 2. Formatted Bike Sharing table (continued view).**
-
-![Formatted Bike Sharing table, continued view](./visuals/formatted-preview.png)
-
-**Figure 3. Seasonal rental summary, sorted by total rentals.**
-
-![Bike Sharing seasonal summary sorted by total rentals](./visuals/sorted-season.png)
+The optional native Qt viewer opens `sza.csv`, `gtcars-numeric.csv`, `day.csv`,
+and `hour.csv` directly as desktop tables. It colors numeric cells from lower
+to higher values independently within each column. The viewer can also open
+CSV summaries produced by `dataset_example` and applies a numeric color scale
+within each column.
 
 | Season | Days | Total rentals | Average rentals | Minimum rentals | Maximum rentals |
 |---|---:|---:|---:|---:|---:|
@@ -120,33 +96,25 @@ to higher values.
 | Winter | 89 | 515,476 | 5,791.87 | 22 | 8,555 |
 | Spring | 91 | 321,348 | 3,531.30 | 441 | 7,836 |
 
-### Color-coded heatmap screenshots
+### Native Qt visualization
 
-The following screenshots show the browser-rendered heatmaps. Daily Bike
-Sharing, hourly Bike Sharing and solar zenith are split into top and bottom
-captures so the complete tables can be read.
+The native Qt application is the supported route for viewing the supplied CSV
+datasets. Follow the configure, build, and run commands in
+[data/README.md](../data/README.md); pass a CSV path to display it, or omit the
+path to run the live table-and-graph demonstration. Qt applies a sequential
+color scale to numeric values in each column.
 
-**Figure 4. Daily Bike Sharing heatmap, top and bottom.**
+The Qt `--render` modes also recreate the earlier project visuals as PNGs
+without using a browser:
 
-| Top | Bottom |
+| Qt visual | Generated image |
 |---|---|
-| ![Daily Bike Sharing heatmap, top](./visuals/bike-day-heatmap-top.png) | ![Daily Bike Sharing heatmap, bottom](./visuals/bike-day-heatmap-bottom.png) |
-
-**Figure 5. Hourly Bike Sharing heatmap, top and bottom.**
-
-| Top | Bottom |
-|---|---|
-| ![Hourly Bike Sharing heatmap, top](./visuals/bike-hour-heatmap-top.png) | ![Hourly Bike Sharing heatmap, bottom](./visuals/bike-hour-heatmap-bottom.png) |
-
-**Figure 6. Solar zenith heatmap, top and bottom.**
-
-| Top | Bottom |
-|---|---|
-| ![Solar zenith heatmap, top](./visuals/solar-zenith-heatmap-top.png) | ![Solar zenith heatmap, bottom](./visuals/solar-zenith-heatmap-bottom.png) |
-
-**Figure 7. Car specification correlation heatmap.**
-
-![Car specification correlation heatmap](./visuals/gtcars-correlation-heatmap.png)
+| Daily Bike Sharing heatmap | ![Daily Bike Sharing heatmap](./visuals/qt-native/bike-day-heatmap-top.png) |
+| Hourly Bike Sharing heatmap | ![Hourly Bike Sharing heatmap](./visuals/qt-native/bike-hour-heatmap-top.png) |
+| Solar zenith heatmap | ![Solar zenith heatmap](./visuals/qt-native/solar-zenith-heatmap-top.png) |
+| Car correlation heatmap | ![Car correlation heatmap](./visuals/qt-native/gtcars-correlation-heatmap.png) |
+| Seasonal rental summary | ![Seasonal rental summary](./visuals/qt-native/sorted-season.png) |
+| Formatted daily table | ![Formatted daily table](./visuals/qt-native/formatted.png) |
 
 ## Architecture
 
@@ -179,7 +147,7 @@ independently audited.
 | Alele Brian Jesse | Grouping | Group keys, duplicate consolidation and counts |
 | Mwanje Hamuza Tendo | Aggregation | Count, sum, mean, minimum and maximum |
 | Tushabe Paul | Formatting and styling | Table/column formatting and style controls |
-| Waran Newton Mono Korsuk | Export and examples | CSV/HTML export and executable usage examples |
+| Waran Newton Mono Korsuk | Export and examples | CSV export and executable usage examples |
 | Bifandhuba Elisha Alvin | Central table / integration | Shared `DataTable`, row operations and integration/build surfaces |
 
 ## Verification
@@ -217,16 +185,16 @@ cmake --install build --config Release --prefix install
 ### Performance sample
 
 The Release performance example loads generated CSV data and measures load,
-filter, sort, group, mean, CSV export and HTML export at three input sizes.
+filter, sort, group, mean and CSV export at three input sizes.
 Observed single-run times on the local Windows/MSVC environment are below.
 These are illustrative timings, not a controlled benchmark or a
 machine-independent performance guarantee.
 
-| Rows | CSV load | Filter | Sort | Group | Mean | CSV export | HTML export |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1,000 | 1,349 µs | 168 µs | 261 µs | 17 µs | 8 µs | 1,018 µs | 1,319 µs |
-| 10,000 | 13,224 µs | 2,249 µs | 4,682 µs | 156 µs | 80 µs | 9,296 µs | 12,842 µs |
-| 100,000 | 136,306 µs | 18,495 µs | 51,534 µs | 2,071 µs | 859 µs | 99,473 µs | 142,394 µs |
+| Rows | CSV load | Filter | Sort | Group | Mean | CSV export |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,000 | 1,349 µs | 168 µs | 261 µs | 17 µs | 8 µs | 1,018 µs |
+| 10,000 | 13,224 µs | 2,249 µs | 4,682 µs | 156 µs | 80 µs | 9,296 µs |
+| 100,000 | 136,306 µs | 18,495 µs | 51,534 µs | 2,071 µs | 859 µs | 99,473 µs |
 
 The sample uses two grouping keys. The grouping implementation retains
 first-seen order by searching existing groups, so grouping is worst-case

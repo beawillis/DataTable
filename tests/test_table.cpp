@@ -294,10 +294,6 @@ void test_full_module_integration()
     datatable::write_csv(ordered, csv);
     assert(csv.str().find("Ada,Engineering,98.5") != std::string::npos);
 
-    std::ostringstream html;
-    datatable::write_html(ordered, html);
-    assert(html.str().find("<td>Ada</td>") != std::string::npos);
-
     // Sorting changes only the working copy, not the filtered source.
     assert(engineering.column("Name")[0].get<std::string>() == "Ada");
 }

@@ -29,6 +29,21 @@ foreach(example IN ITEMS csv filtering grouping export integration performance)
     )
 endforeach()
 
+if(DATATABLE_BUILD_QT_LIVE_VIEWER)
+    find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+    add_executable(qt_live_viewer
+        qt_live_viewer.cpp
+    )
+
+    target_link_libraries(qt_live_viewer
+        PRIVATE
+            DataTable::DataTable
+            Qt${QT_VERSION_MAJOR}::Widgets
+    )
+endif()
+
 # Run every public example during CTest when both build options are enabled.
 if(DATATABLE_BUILD_TESTS)
     add_test(
