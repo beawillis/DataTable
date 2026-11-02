@@ -1,198 +1,184 @@
 # Dataset files
 
-- `input/day.csv` and `input/hour.csv` are the UCI Bike Sharing dataset CSVs.
-- Use `day.csv` for smaller interactive tests and `hour.csv` for larger tests.
-- `input/sza.csv` contains solar zenith angle measurements for heatmap-style
-  color-scale demonstrations.
-- `input/gtcars.csv` is the full 47-car source dataset. Use
-  `input/gtcars-numeric.csv` with the current typed-table command-line tool;
-  it contains the seven numeric columns used for a correlation heatmap.
-- Put generated exports and other test results in `output/`; its contents are
-  ignored by Git so test runs do not add generated files to the repository.
-- From the repository root, build the real-dataset tool:
+[Project overview](../README.md) · [Build and test](../README.md#build-and-test) ·
+[API overview](../README.md#api-overview) · [Reports](../reports/README.md)
 
-  ```powershell
-  cmake --build build --config Debug --target dataset_example
-  ```
+## Contents
 
-  Then choose an operation:
+- [Open a CSV in the native Qt viewer](#open-a-csv-in-the-native-qt-viewer)
+  - [Configure and build](#configure-and-build)
+  - [View the included datasets](#view-the-included-datasets)
+- [Recreate the project visuals with Qt](#recreate-the-project-visuals-with-qt)
+- [Transform datasets with the command-line example](#transform-datasets-with-the-command-line-example)
+- [Dataset notes](#dataset-notes)
 
-  ```powershell
-  # Sort by cnt, highest first; column defaults to cnt.
-  .\build\examples\Debug\dataset_example.exe sort data\input\day.csv data\output\day-sorted.csv
+- `input/day.csv` and `input/hour.csv` are the UCI Bike Sharing datasets.
+  `day.csv` is smaller; `hour.csv` contains the larger hourly dataset.
+- `input/sza.csv` contains solar zenith angle measurements from the `gt`
+  package's [`sza` data](https://raw.githubusercontent.com/rstudio/gt/master/data-raw/sza.csv).
+- `input/gtcars.csv` is the 47-car dataset from the `gt` package. Use
+  `input/gtcars-numeric.csv` to view its seven numeric specification fields.
+- The `sza` and `gtcars` data are adapted from the
+  [`gt` package](https://github.com/rstudio/gt), which is licensed under MIT.
+  Keep the source links and attribution when redistributing them.
+- Put generated CSV results in `output/`; this directory is ignored by Git.
 
-  # Keep only spring records (season == 1).
-  .\build\examples\Debug\dataset_example.exe filter data\input\day.csv data\output\spring.csv season 1
+## Open a CSV in the native Qt viewer
 
-  # Export the original dataset as CSV or a complete HTML document.
-  .\build\examples\Debug\dataset_example.exe export data\input\day.csv data\output\day-copy.csv
-  .\build\examples\Debug\dataset_example.exe export data\input\day.csv data\output\day.html
+The optional Qt application displays CSV data in a native desktop table.
+Numeric cells are color-coded from lower to higher values within each column;
+text and missing values remain uncolored. The viewer reads CSV fields as text
+for display, so it can also show datasets whose numeric columns contain a mix
+of integer-looking and decimal values.
 
-  # Format a readable preview in the console (20 rows by default).
-  .\build\examples\Debug\dataset_example.exe format data\input\day.csv 10
+### Configure and build
 
-  # Format the first 10 rows and also export those rows as a styled HTML table.
-  .\build\examples\Debug\dataset_example.exe format data\input\day.csv 10 data\output\day-first-10.html
-  Start-Process .\data\output\day-first-10.html
+Install Qt 5 or Qt 6 with the **Widgets** development component, plus CMake and
+a compiler compatible with that Qt kit. A MinGW Qt kit must use its matching
+MinGW compiler. From the repository root, replace the example Qt version and
+paths below with your installation:
 
-  # Group and count records by season.
-  .\build\examples\Debug\dataset_example.exe group data\input\hour.csv season
+```powershell
+$env:PATH = "C:\Qt\Tools\mingw1310_64\bin;C:\Qt\Tools\Ninja;$env:PATH"
 
-  # Create a report-ready analysis: filter to 2012, group by season,
-  # calculate rental-count statistics, and sort by total rentals descending.
-  .\build\examples\Debug\dataset_example.exe summary data\input\day.csv reports\visuals\bike-sharing-season-summary.html
+cmake -S . -B build-qt -G Ninja `
+  -DCMAKE_MAKE_PROGRAM="C:\Qt\Tools\Ninja\ninja.exe" `
+  -DCMAKE_CXX_COMPILER="C:\Qt\Tools\mingw1310_64\bin\g++.exe" `
+  -DCMAKE_PREFIX_PATH="C:\Qt\6.12.0\mingw_64" `
+  -DDATATABLE_BUILD_QT_LIVE_VIEWER=ON `
+  -DDATATABLE_BUILD_EXAMPLES=ON `
+  -DDATATABLE_BUILD_TESTS=OFF
 
-  # Filter solar angles to latitude 20, group and aggregate by month,
-  # then sort by average angle and export an HTML table.
-  .\build\examples\Debug\dataset_example.exe sza-summary data\input\sza.csv reports\visuals\solar-zenith-summary.html 20
-  Start-Process .\reports\visuals\solar-zenith-summary.html
+cmake --build build-qt --target qt_live_viewer
+```
 
-  # Export a browser heatmap with a yellow-to-purple scale for SZA values.
-  .\build\examples\Debug\dataset_example.exe sza-heatmap data\input\sza.csv reports\visuals\solar-zenith-heatmap.html 20
-  Start-Process .\reports\visuals\solar-zenith-heatmap.html
+### View the included datasets
 
-  # Export the car numeric correlation matrix with a blue-white-red scale.
-  .\build\examples\Debug\dataset_example.exe correlation-heatmap data\input\gtcars-numeric.csv reports\visuals\gtcars-correlation-heatmap.html
+Run one command at a time from the repository root:
 
-  # Export daily average rentals by month and year.
-  .\build\examples\Debug\dataset_example.exe bike-heatmap data\input\day.csv reports\visuals\bike-day-heatmap.html
+```powershell
+$env:PATH = "C:\Qt\6.12.0\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
 
-  # Export hourly average rentals by hour and season.
-  .\build\examples\Debug\dataset_example.exe bike-heatmap data\input\hour.csv reports\visuals\bike-hour-heatmap.html
-  ```
+.\build-qt\examples\qt_live_viewer.exe .\data\input\day.csv
+.\build-qt\examples\qt_live_viewer.exe .\data\input\hour.csv
+.\build-qt\examples\qt_live_viewer.exe .\data\input\sza.csv
+.\build-qt\examples\qt_live_viewer.exe .\data\input\gtcars-numeric.csv
+```
 
-  Replace `day.csv` with `hour.csv` to use the larger hourly dataset. Column
-  names are taken from the CSV header. Filter values must match the column's
-  type (for example, `season 1` or `dteday 2011-01-01`). Use `Release` instead
-  of `Debug` in the executable path if you build the Release configuration.
-  For `format`, provide the row count before the optional HTML path. The HTML
-  file contains the same first rows displayed by the terminal preview.
-  The summary maps season codes 1–4 to Spring, Summer, Fall and Winter, and
-  reports the day count plus total, average, minimum and maximum rentals for
-  each season in 2012.
-  The `sza-summary` command defaults to latitude 20 and shows valid
-  observations, average, minimum and maximum solar zenith angle by month.
-  Supply another latitude as the final argument to select a different one.
-  The `sza-heatmap` command creates a month-by-time HTML heatmap with values
-  colored from yellow (low angle) to purple (high angle); it defaults to
-  latitude 20.
-  `correlation-heatmap` calculates pairwise Pearson correlations and colors
-  negative values blue, near-zero values white and positive values red.
-  `bike-heatmap` groups daily rental counts by month and year, or hourly
-  rental counts by hour and season, then colors the averages from lower to
-  higher.
+The same viewer can display any CSV with a header row and consistent field
+counts. For a regular CSV, numeric cells are colored against the minimum and
+maximum of their own column; columns use a fixed initial width so the full
+dataset does not need to be scanned just to size the headers.
 
-## Generate and capture the color-coded browser tables
+Close the window before launching another dataset. To see the live
+table-and-graph demonstration instead, run the viewer without a file argument:
 
-From the repository root, build once and generate all three additional
-heatmaps (the solar heatmap is included as a fourth command):
+```powershell
+.\build-qt\examples\qt_live_viewer.exe
+```
+
+## Recreate the project visuals with Qt
+
+The Qt application has native modes for the same project visuals: daily Bike
+Sharing, hourly Bike Sharing, solar zenith, car correlations, the sorted
+seasonal summary, and two formatted daily-table previews. To view a visual in a
+desktop window, use `--show <mode> <csv>`:
+
+```powershell
+.\build-qt\examples\qt_live_viewer.exe --show bike-day-top .\data\input\day.csv
+.\build-qt\examples\qt_live_viewer.exe --show bike-hour-top .\data\input\hour.csv
+.\build-qt\examples\qt_live_viewer.exe --show solar-top .\data\input\sza.csv
+.\build-qt\examples\qt_live_viewer.exe --show correlation .\data\input\gtcars-numeric.csv
+.\build-qt\examples\qt_live_viewer.exe --show summary .\data\input\day.csv
+```
+
+Use `--render <mode> <csv> <output.png>` to generate an image directly from
+the native Qt widgets. Run these commands from the repository root to recreate
+all the visuals in `reports/visuals/qt-native/`:
+
+```powershell
+$viewer = ".\build-qt\examples\qt_live_viewer.exe"
+$output = ".\reports\visuals\qt-native"
+
+& $viewer --render bike-day-top .\data\input\day.csv "$output\bike-day-heatmap-top.png"
+& $viewer --render bike-day-bottom .\data\input\day.csv "$output\bike-day-heatmap-bottom.png"
+& $viewer --render bike-hour-top .\data\input\hour.csv "$output\bike-hour-heatmap-top.png"
+& $viewer --render bike-hour-bottom .\data\input\hour.csv "$output\bike-hour-heatmap-bottom.png"
+& $viewer --render solar-top .\data\input\sza.csv "$output\solar-zenith-heatmap-top.png"
+& $viewer --render solar-bottom .\data\input\sza.csv "$output\solar-zenith-heatmap-bottom.png"
+& $viewer --render correlation .\data\input\gtcars-numeric.csv "$output\gtcars-correlation-heatmap.png"
+& $viewer --render summary .\data\input\day.csv "$output\sorted-season.png"
+& $viewer --render formatted .\data\input\day.csv "$output\formatted.png"
+& $viewer --render formatted-preview .\data\input\day.csv "$output\formatted-preview.png"
+```
+
+The daily and hourly heatmaps group rentals (`cnt`) by month and year, or by
+hour and season, then color the averages. The solar visual reshapes the angle
+measurements for latitude 20 into a month-by-time heatmap and splits the months
+into two images, keeping all 17 time columns visible in each. The correlation
+visual computes Pearson correlations for the seven numeric car fields using a
+blue-white-red scale. The summary filters daily records to 2012, groups by
+season, calculates rental statistics, and sorts by total rentals. The formatted
+views show rows 1–10 and 11–20 of `day.csv`.
+
+The PNG captures are generated directly from native Qt widgets. The commands
+create the `qt-native` directory if it does not already exist.
+
+## Transform datasets with the command-line example
+
+The non-Qt `dataset_example` can sort, filter, format, group, summarize, and
+export CSV data. It writes CSV output; use `qt_live_viewer` to inspect a CSV
+result with the native Qt interface.
+
+Build the command-line example in the existing standard build:
 
 ```powershell
 cmake --build build --config Debug --target dataset_example
-
-.\build\examples\Debug\dataset_example.exe correlation-heatmap data\input\gtcars-numeric.csv reports\visuals\gtcars-correlation-heatmap.html
-.\build\examples\Debug\dataset_example.exe bike-heatmap data\input\day.csv reports\visuals\bike-day-heatmap.html
-.\build\examples\Debug\dataset_example.exe bike-heatmap data\input\hour.csv reports\visuals\bike-hour-heatmap.html
-.\build\examples\Debug\dataset_example.exe sza-heatmap data\input\sza.csv reports\visuals\solar-zenith-heatmap.html 20
 ```
 
-Use this PowerShell function to open any generated page directly in Chrome.
-Paste the function once per PowerShell window, then call it with an HTML path:
+Examples:
 
 ```powershell
-function Open-DataTableHtmlInChrome {
-    param([Parameter(Mandatory = $true)][string]$HtmlPath)
+# Sort by rental count, highest first.
+.\build\examples\Debug\dataset_example.exe sort .\data\input\day.csv .\data\output\day-sorted.csv
 
-    $resolvedHtml = (Resolve-Path -LiteralPath $HtmlPath).Path
-    $chromeCommand = Get-Command chrome.exe -ErrorAction SilentlyContinue
-    $chromePath = $null
-    if ($chromeCommand) {
-        $chromePath = $chromeCommand.Source
-    }
-    else {
-        $candidates = @(
-            "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
-            "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
-            "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
-        )
-        foreach ($candidate in $candidates) {
-            if (Test-Path -LiteralPath $candidate) {
-                $chromePath = $candidate
-                break
-            }
-        }
-    }
+# Keep only spring records (season == 1).
+.\build\examples\Debug\dataset_example.exe filter .\data\input\day.csv .\data\output\spring.csv season 1
 
-    if (-not $chromePath) {
-        Write-Warning "Chrome was not found; opening the HTML file in your default browser."
-        Start-Process -FilePath $resolvedHtml
-        return
-    }
-    Start-Process -FilePath $chromePath -ArgumentList "`"$resolvedHtml`""
-}
+# Format the first ten rows in the console.
+.\build\examples\Debug\dataset_example.exe format .\data\input\day.csv 10
 
-Open-DataTableHtmlInChrome reports\visuals\gtcars-correlation-heatmap.html
-# Call the same function with another generated HTML file as needed.
+# Group hourly records by season.
+.\build\examples\Debug\dataset_example.exe group .\data\input\hour.csv season
+
+# Summarize 2012 daily rentals by season.
+.\build\examples\Debug\dataset_example.exe summary .\data\input\day.csv .\data\output\bike-season-summary.csv
+
+# Summarize solar zenith angles by month for latitude 20.
+.\build\examples\Debug\dataset_example.exe sza-summary .\data\input\sza.csv .\data\output\solar-zenith-summary.csv 20
 ```
 
-In Chrome, press **Windows + Shift + S**, select the heatmap, and save each
-PNG into `exported-images-examples` using the matching filename below. The
-day, hour, and solar heatmaps are split into top and bottom screenshots so the
-full tables are readable.
-
-| HTML page | Screenshot filename(s) |
-|---|---|
-| `bike-day-heatmap.html` | `bike-day-heatmap-top.png`, `bike-day-heatmap-bottom.png` |
-| `bike-hour-heatmap.html` | `bike-hour-heatmap-top.png`, `bike-hour-heatmap-bottom.png` |
-| `solar-zenith-heatmap.html` | `solar-zenith-heatmap-top.png`, `solar-zenith-heatmap-bottom.png` |
-| `gtcars-correlation-heatmap.html` | `gtcars-correlation-heatmap.png` |
-
-To also include a screenshot in the report visuals folder, copy it after saving:
+Display a generated result in the native viewer, for example:
 
 ```powershell
-Copy-Item exported-images-examples\gtcars-correlation-heatmap.png reports\visuals\
+.\build-qt\examples\qt_live_viewer.exe .\data\output\bike-season-summary.csv
 ```
 
-Repeat with the chosen screenshot filename. Add the PNGs to the report with
-Markdown image links, for example:
+That command displays the seasonal summary as a color-scaled Qt table. It
+doesn't draw a seasonal chart or compute a two-dimensional heatmap. To see the
+all-row data with numeric cells colored, open `day.csv` or `hour.csv` directly.
 
-```markdown
-![Car specification correlation heatmap](../reports/visuals/gtcars-correlation-heatmap.png)
-```
+Replace `Debug` with `Release` in the command-line executable path when using
+a Release build. The Qt kit, compiler, and CMake generator must be compatible;
+use a separate build directory if you switch toolchains.
 
-## Heatmap example datasets
+## Dataset notes
 
-The screenshots that inspired the heatmap idea use two datasets from the
-[`gt` package](https://github.com/rstudio/gt), which is licensed under MIT:
-
-- [`sza.csv`](https://raw.githubusercontent.com/rstudio/gt/master/data-raw/sza.csv)
-  has 816 rows with latitude, month, true solar time and solar zenith angle.
-  The corresponding [`sza` documentation](https://gt.rstudio.com/reference/sza.html)
-  describes the data and its 4 northern-hemisphere latitudes. The screenshot's
-  solar-angle table uses the 20-degree latitude values. Source `NA` values
-  are empty in our local CSV because the DataTable loader treats empty CSV
-  fields as null. The time labels use `HH:MM` so they remain text in the
-  current type-inferencing loader.
-- [`gtcars.csv`](https://raw.githubusercontent.com/rstudio/gt/master/data-raw/gtcars.csv)
-  has 47 cars and 15 descriptive and specification fields. The correlation
-  heatmap is calculated from numeric fields in this dataset; it is not itself
-  a separate raw dataset. `gtcars-numeric.csv` is a seven-column numeric
-  projection (`hp`, `hp_rpm`, `trq`, `trq_rpm`, `mpg_c`, `mpg_h`, and `msrp`)
-  to make the values usable with this project's current typed CSV loader.
-  The full CSV includes numeric-only model names such as `911`, which the
-  current loader interprets as numbers and rejects in a text column.
-
-The local `sza.csv` and `gtcars.csv` files are adapted from those source CSVs
-only to represent missing values as empty cells; `sza.csv` also uses `HH:MM`
-time labels, and `gtcars-numeric.csv` is a derived column subset. Keep the
-source links and attribution when redistributing these datasets.
-
-The tool normalizes integer-looking values to decimal notation in numeric
-columns that also contain decimal values. This compatibility step happens in
-memory; it does not change the downloaded source CSVs. The core CSV loader
-continues to reject mixed non-null cell types.
-
-The CSV files were downloaded from the
-[UCI Bike Sharing dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset).
-The library reads local CSV streams; it does not download URLs or open ZIP
-archives itself.
+- The Bike Sharing files come from the
+  [UCI Bike Sharing dataset](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset).
+- `sza.csv` has 816 rows with latitude, month, true solar time, and solar
+  zenith angle. Empty fields represent source `NA` values.
+- `gtcars-numeric.csv` is a seven-column projection of the car dataset:
+  `hp`, `hp_rpm`, `trq`, `trq_rpm`, `mpg_c`, `mpg_h`, and `msrp`.
+-   The Qt viewer supports both per-column color-coded CSV tables and the
+  pre-aggregated native heatmap and summary modes documented above.

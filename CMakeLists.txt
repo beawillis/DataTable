@@ -26,6 +26,16 @@ option(DATATABLE_BUILD_EXAMPLES
        "Build DataTable examples"
        ON)
 
+option(DATATABLE_BUILD_QT_LIVE_VIEWER
+       "Build the optional native Qt CSV viewer and live table/graph example"
+       OFF)
+
+if(DATATABLE_BUILD_QT_LIVE_VIEWER AND NOT DATATABLE_BUILD_EXAMPLES)
+    message(FATAL_ERROR
+        "DATATABLE_BUILD_QT_LIVE_VIEWER requires DATATABLE_BUILD_EXAMPLES=ON."
+    )
+endif()
+
 # ============================================================
 # LIBRARY
 # ============================================================

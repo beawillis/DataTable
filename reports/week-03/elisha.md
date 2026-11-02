@@ -159,8 +159,8 @@ standalone functions. No new class hierarchy was needed or introduced.
 - Invalid indices raise `std::out_of_range`.
 - Each module retains its own implementation and standalone APIs where they
   remain useful; Elisha's work connects those APIs through `DataTable`.
-- Advanced joins, grouped aggregation results, styling themes, and HTML row
-  export remain outside this integration task.
+- Advanced joins, grouped aggregation results, styling themes, and additional
+  Qt table-view features remain outside this integration task.
 
 ## 6. Validation
 

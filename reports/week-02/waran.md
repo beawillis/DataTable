@@ -32,8 +32,7 @@ Fields are quoted when required by CSV syntax. Embedded double quotes are
 escaped by doubling them. The exporter validates the output stream before and
 after writing and reports failures with `std::ios_base::failure`.
 
-The existing HTML export remains available and continues to write the current
-schema as an HTML document. This Week 2 task focuses on CSV export.
+The Week 2 task focuses on completing CSV export.
 
 ### 2.3 Tests
 
@@ -131,7 +130,7 @@ and predictable.
 - Null values become empty fields.
 - Fields are quoted only when CSV syntax requires it.
 - CRLF is used as the record terminator.
-- HTML export is outside the main Week 2 CSV scope.
+- Native Qt provides the application's table presentation.
 
 ## 6. Validation
 
@@ -145,5 +144,5 @@ Full CTest suite: 12/12 tests passed
 
 1. Coordinating with the formatter owner when console and export output need a
    shared presentation policy.
-2. Extending HTML export to include complete row data in a later assignment.
+2. Extending the native Qt table viewer to present complete CSV datasets.
 3. Adding file-based export examples after the public export API is finalized.

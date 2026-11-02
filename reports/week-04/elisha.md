@@ -22,7 +22,7 @@ Added an end-to-end table-core test that performs the complete workflow:
 5. Aggregate the score column.
 6. Format the result for console output.
 7. Export the result to CSV.
-8. Export the result to HTML.
+8. Display the result in the native Qt table viewer.
 
 The test also confirms that sorting a working copy does not modify the
 filtered source table.
@@ -87,7 +87,7 @@ The table test now covers:
 - aggregation;
 - formatting;
 - CSV export;
-- HTML export; and
+- native Qt table presentation; and
 - preservation of the source table.
 
 Validation performed locally:
@@ -124,8 +124,7 @@ architecture.
 - The performance example is a smoke test, not a full benchmark suite.
 - No formal memory profiler or cross-platform performance comparison is
   included.
-- The existing HTML and CSV exporters still use output streams rather than
-  file-path convenience APIs.
+- CSV export still uses output streams rather than a file-path convenience API.
 - Advanced joins, grouped aggregate result tables, and query planning remain
   outside the current release.
 

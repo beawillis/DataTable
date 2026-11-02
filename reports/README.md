@@ -9,9 +9,9 @@
 - [Final report](./final/)
 - [Report visuals](./visuals/)
 
-The visuals folder contains screenshots of formatted and analyzed Bike
-Sharing tables and value-colored heatmaps. The daily Bike Sharing, hourly Bike
-Sharing, and solar zenith heatmaps have top and bottom captures to show the
-full tables; the car-correlation heatmap fits in one screenshot. Matching
-HTML exports are included for browser viewing. See the [general report](./General-Report.md)
-for the embedded figures and analysis.
+The visualization workflow is the native Qt CSV viewer documented in
+[data/README.md](../data/README.md). It displays CSV tables and applies a
+per-column color scale to numeric values, and native heatmap modes reproduce
+the daily/hourly Bike Sharing, solar zenith, and car-correlation visuals. The
+generated Qt PNG captures are in [`visuals/qt-native`](./visuals/qt-native/).
+See the [general report](./General-Report.md) for project analysis.
